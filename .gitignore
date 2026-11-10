@@ -1,0 +1,4 @@
+build/
+voices/
+output/preview_*.png
+__pycache__/
