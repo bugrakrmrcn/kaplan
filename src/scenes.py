@@ -175,49 +175,61 @@ def siren_lights(cv, t, alpha=80):
 
 
 # ======================================================================= yakın planlar
-def phone_closeup(cv, t, banner_t, shake):
-    vgrad(cv, (0, 0, W, H), [C("#2a2140"), C("#5b3a55"), C("#c0705a")], [0, 0.6, 1])
-    for i in range(14):  # bulanık bokeh ışıkları
-        rnd = random.Random(i)
-        glow(cv, rnd.uniform(0, W), rnd.uniform(200, 1500), rnd.uniform(60, 160), C("#ffcf80"), 90)
+def draw_phone(cv, x, y, rot, sc, t, banner_t, shake, clock, body, body_size, case, sleeve, stripes, skin):
     sx = (math.sin(t * 70) * 8) * shake
     cv.save()
-    cv.translate(W / 2 + sx, 980)
-    cv.rotate(-6 + math.sin(t * 60) * 1.5 * shake)
-    # el (arkada)
-    circle(cv, -260, 330, 120, SKIN)
-    # telefon
-    rrect(cv, -270, -560, 540, 1100, 70, C("#121216"))
+    cv.translate(x + sx, y)
+    cv.rotate(rot + math.sin(t * 60) * 1.5 * shake)
+    cv.scale(sc, sc)
+    circle(cv, -260, 330, 120, skin)           # avuç (arkada)
+    rrect(cv, -270, -560, 540, 1100, 70, case)
     rr = skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(-248, -538, 496, 1056), 54, 54)
     cv.save()
     cv.clipRRect(rr, True)
     vgrad(cv, (-248, -538, 496, 1056), [C("#1f3b6b"), C("#5b3f8a"), C("#c46b8a")])
-    text(cv, "21:47", 0, -330, 150, C("#ffffff"), font=FONT_BOLD)
+    text(cv, clock, 0, -330, 150, C("#ffffff"), font=FONT_BOLD)
     text(cv, "Salı, 10 Kasım", 0, -250, 40, C("#ffffff", 220))
-    # bildirim kartı
     if banner_t > 0:
-        y = lerp(-700, -190, ease_out_back(banner_t))
-        rrect(cv, -225, y, 450, 230, 34, C("#f4f4f6", 245), outline=False)
-        rrect(cv, -200, y + 24, 56, 56, 14, C("#e53935"), outline=False)
-        poly(cv, [(-172, y + 34), (-154, y + 68), (-190, y + 68)], C("#ffffff"), outline=False)
-        cv.drawLine(-172, y + 46, -172, y + 58, stroke(C("#e53935"), 5))
-        text(cv, "ACİL DURUM UYARISI", -128, y + 50, 27, C("#222222"), align="left")
-        text(cv, "şimdi", 200, y + 92, 24, C("#888888"), align="right")
-        text(cv, "Sakın sokağa", -200, y + 130, 50, C("#c62828"), align="left")
-        text(cv, "çıkmayın!", -200, y + 190, 50, C("#c62828"), align="left")
+        bh = 150 + len(body) * (body_size + 10)
+        y0 = lerp(-760, -200, ease_out_back(banner_t))
+        rrect(cv, -225, y0, 450, bh, 34, C("#f4f4f6", 245), outline=False)
+        rrect(cv, -200, y0 + 24, 56, 56, 14, C("#e53935"), outline=False)
+        poly(cv, [(-172, y0 + 34), (-154, y0 + 68), (-190, y0 + 68)], C("#ffffff"), outline=False)
+        cv.drawLine(-172, y0 + 46, -172, y0 + 58, stroke(C("#e53935"), 5))
+        text(cv, "ACİL DURUM UYARISI", -128, y0 + 50, 27, C("#222222"), align="left")
+        text(cv, "şimdi", 200, y0 + 92, 24, C("#888888"), align="right")
+        for i, ln in enumerate(body):
+            text(cv, ln, -200, y0 + 130 + i * (body_size + 10), body_size, C("#c62828"), align="left")
     cv.restore()
     rrect(cv, -60, -520, 120, 34, 17, C("#000000"), outline=False)
     cv.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(-270, -560, 540, 1100), 70, 70), stroke(OUTLINE, 8))
-    # parmaklar (önde)
-    for i in range(3):
-        rrect(cv, 200, -120 + i * 120, 120, 90, 45, SKIN)
-    rrect(cv, -330, 160, 150, 90, 45, SKIN)
+    for i in range(3):                          # parmaklar (önde)
+        rrect(cv, 200, -120 + i * 120, 120, 90, 45, skin)
+    rrect(cv, -330, 160, 150, 90, 45, skin)
     cv.restore()
-    # Arda'nın eşofman kolu
-    limb(cv, (-60 + sx, 1900), (180 + sx, 1400), 230, C("#1f2127"), stripes=True)
+    limb(cv, (x - 600 * sc + sx, y + 920 * sc), (x - 360 * sc + sx, y + 420 * sc), 230 * sc, sleeve,
+         stripes=stripes)
 
 
-def watch_closeup(cv, t, bpm, beat):
+def phone_closeup(cv, t, banner_t, shake, clock="21:17", body=("Sakın sokağa", "çıkmayın!"), body_size=50,
+                  second=None):
+    """Telefon yakın planı. second=(banner_t) verilirse arkada Hayriye'nin telefonu da çalar."""
+    vgrad(cv, (0, 0, W, H), [C("#2a2140"), C("#5b3a55"), C("#c0705a")], [0, 0.6, 1])
+    for i in range(14):  # bulanık bokeh ışıkları
+        rnd = random.Random(i)
+        glow(cv, rnd.uniform(0, W), rnd.uniform(200, 1500), rnd.uniform(60, 160), C("#ffcf80"), 90)
+    if second is not None:
+        draw_phone(cv, W / 2 - 250, 760, 9, 0.72, t + 0.3, second, shake, clock, body, body_size,
+                   C("#e58fb0"), C("#8f2d3c"), False, C("#f8dcc0"))
+        cv.drawRect(skia.Rect.MakeWH(W, H), fill(C("#000000", 70)))
+        dx = 150
+    else:
+        dx = 0
+    draw_phone(cv, W / 2 + dx, 980, -6, 1.0, t, banner_t, shake, clock, body, body_size,
+               C("#121216"), C("#1f2127"), True, SKIN)
+
+
+def watch_closeup(cv, t, bpm, beat, clock=None, remain=None):
     vgrad(cv, (0, 0, W, H), [C("#140c14"), C("#3a1420"), C("#5a1a22")])
     for i in range(10):
         rnd = random.Random(i + 20)
@@ -237,6 +249,12 @@ def watch_closeup(cv, t, bpm, beat):
     rrect(cv, -150, -190, 380, 410, 90, C("#3a3a40"))
     rrect(cv, -128, -168, 336, 366, 74, C("#050505"), outline=False)
     rrect(cv, 228, -40, 24, 80, 10, C("#5a5a60"))
+    if clock is not None:   # saat modu (2. bölüm): saat + geri sayım
+        text(cv, clock, 30, 20, 118, C("#ffffff"))
+        text(cv, "SALI 10", 30, -100, 34, C("#ff9f0a"))
+        text(cv, remain, 30, 115, 33, C("#ff4d4d"))
+        cv.restore()
+        return
     hx, hy = 30, -60
     hs = 1 + beat * 0.25
     p = skia.Path()

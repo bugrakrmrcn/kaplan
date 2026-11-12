@@ -45,7 +45,27 @@ def trim(x, thr=0.01):
     return x[max(0, idx[0] - 400): idx[-1] + 2000]
 
 
-def tts(text):
+# konuşmacı sesleri: Piper'ın Türkçe sesinden Praat "Change gender" ile türetilir
+#   (formant oranı, hedef perde medyanı Hz, perde aralığı çarpanı, hız)
+VOICES = {
+    "narrator": None,
+    "arda": (0.96, 112, 1.45, 1.0),
+    "hayriye": (1.20, 240, 1.35, 1.0),
+}
+
+
+def _voice_fx(path_in, path_out, params):
+    import parselmouth
+    from parselmouth.praat import call
+    snd = parselmouth.Sound(path_in)
+    fr, pm, rng_, dur = params
+    out = call(snd, "Change gender", 75, 600, fr, pm, rng_, dur)
+    peak = max(abs(out.values.max()), abs(out.values.min()), 1e-6)
+    out.values = out.values / peak * 0.95
+    out.save(path_out, "WAV")
+
+
+def tts(text, voice="narrator"):
     """Metni seslendirir, önbellekler ve float32 mono dizi döndürür."""
     os.makedirs(CACHE, exist_ok=True)
     key = hashlib.md5(f"{text}|{LENGTH_SCALE}".encode()).hexdigest()[:12]
@@ -54,6 +74,12 @@ def tts(text):
         subprocess.run([sys.executable, "-m", "piper", "-m", VOICE, "-f", path,
                         "--length-scale", str(LENGTH_SCALE), "--noise-scale", "0.6"],
                        input=text.encode(), check=True, capture_output=True)
+    params = VOICES.get(voice)
+    if params:
+        vpath = os.path.join(CACHE, f"{key}_{voice}_" + "_".join(map(str, params)) + ".wav")
+        if not os.path.exists(vpath):
+            _voice_fx(path, vpath, params)
+        path = vpath
     v = trim(read_wav(path))
     v = v / (np.abs(v).max() + 1e-6) * 0.9
     return v
@@ -193,7 +219,60 @@ def sfx_heartbeat():
     return out * 0.9
 
 
+def sfx_ding2():
+    """İki telefon aynı anda: ikincisi biraz gecikmeli ve daha pes."""
+    a = sfx_ding()
+    b = sfx_ding()
+    b = np.interp(np.arange(0, len(b), 0.84), np.arange(len(b)), b).astype(np.float32) * 0.8
+    off = int(0.09 * SR)
+    out = np.zeros(max(len(a), off + len(b)), np.float32)
+    out[:len(a)] += a
+    out[off:off + len(b)] += b
+    return out
+
+
+def sfx_sob():
+    """Hıçkırarak ağlama: titreyen kısa nefesler."""
+    out = np.zeros(int(1.6 * SR), np.float32)
+    for k, off in enumerate((0.0, 0.18, 0.33, 0.62, 0.8, 0.95)):
+        h = sfx_huh(1.35 + 0.05 * (k % 2), 0.7)
+        t = np.arange(len(h)) / SR
+        h = h * (0.6 + 0.4 * np.sin(2 * np.pi * 14 * t))
+        i = int(off * SR)
+        out[i:i + len(h)] += h
+    return out
+
+
+def sfx_pop():
+    n = int(0.12 * SR)
+    t = np.arange(n) / SR
+    return (np.sin(2 * np.pi * (500 + 1500 * t / 0.12) * t) * np.exp(-t * 30) * 0.35).astype(np.float32)
+
+
+def sfx_crunch():
+    n = int(0.25 * SR)
+    out = np.zeros(n, np.float32)
+    for off in (0.0, 0.07, 0.15):
+        m = int(0.04 * SR)
+        c = bandnoise(m, 1500, 7000) * env(m, 0.001, 0.01) * 0.5
+        i = int(off * SR)
+        out[i:i + m] += c
+    return out
+
+
+def sfx_love():
+    """Tatlı, kısa arp (aşk anı)."""
+    out = np.zeros(int(1.6 * SR), np.float32)
+    for k, f in enumerate((523.3, 659.3, 784.0, 1046.5)):
+        n = int(1.2 * SR)
+        x = sine(f, 1.2) * env(n, 0.005, 0.4) * 0.18
+        i = int(k * 0.11 * SR)
+        out[i:i + n] += x
+    return out
+
+
 SFX = {
+    "ding2": sfx_ding2, "sob": sfx_sob, "pop": sfx_pop, "crunch": sfx_crunch, "love": sfx_love,
     "buzz": sfx_buzz, "ding": sfx_ding, "sting": sfx_sting, "drone_hit": sfx_drone_hit,
     "boom": sfx_boom, "siren": sfx_siren, "boots": sfx_boots, "gun_cock": sfx_gun_cock,
     "whoosh": sfx_whoosh, "footstep_soft": sfx_footstep_soft,
@@ -207,7 +286,9 @@ def music(total, scene_spans):
     t = np.arange(n) / SR
     intensity = np.full(n, 0.35, np.float32)
     level = {"hook": 0.5, "intro": 0.3, "notif": 0.55, "look": 0.6, "soldiers": 0.8, "aim": 0.95,
-             "run": 1.0, "watch": 0.9, "rest": 0.6, "girl": 0.7, "end": 0.5}
+             "run": 1.0, "watch": 0.9, "rest": 0.6, "girl": 0.7, "end": 0.5,
+             "recap": 0.5, "meet": 0.3, "love": 0.25, "run2": 0.85, "notif2": 0.8, "cry": 0.6,
+             "watch2": 0.9, "plan": 0.6, "leblebi": 0.45, "end2": 0.4}
     for name, a, b in scene_spans:
         intensity[int(a * SR):int(b * SR)] = level.get(name, 0.4)
     # yumuşat

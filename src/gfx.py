@@ -265,6 +265,8 @@ class Figure:
     def draw(self, cv, x, y, s=1.0, facing=1, pose=None, **kw):
         pose = pose or pose_stand()
         H, S, legs, arms, head = self.joints(pose)
+        self.hands = [(x + s * facing * a_[2][0], y + s * a_[2][1]) for a_ in arms]
+        self.head_pos = (x + s * facing * head[0], y + s * head[1])
         cv.save()
         cv.translate(x, y)
         cv.scale(s * facing, s)
@@ -276,6 +278,11 @@ class Figure:
         self.draw_props_behind(cv, arms, kw)
         self.draw_arm(cv, arms[0], False, kw.get("skin", SKIN))
         self.draw_props_front(cv, arms, kw)
+        item = kw.get("hand_item")
+        if item == "leblebi":
+            hx_, hy_ = arms[0][2]
+            for i, (ox, oy) in enumerate(((-12, -14), (6, -18), (16, -6), (-4, -26), (10, -30))):
+                circle(cv, hx_ + ox, hy_ + oy, 10, C("#f0d27a"), lw=3)
         cv.translate(head[0], head[1])
         cv.rotate(math.degrees(pose.get("head_tilt", 0.0) * 0.3))
         cv.scale(facing, 1)  # yüz her zaman düzgün okunsun
@@ -305,6 +312,19 @@ def draw_eyes(cv, look, expr, dx=36, y=-4):
     elif expr == "tired":
         for sx in (-dx, dx):
             cv.drawLine(sx - 13 + lx, y + 4, sx + 13 + lx, y + 2, stroke(OUTLINE, 6))
+    elif expr in ("cry", "happy"):
+        for sx in (-dx, dx):
+            p = skia.Path()
+            if expr == "cry":   # sıkıca kapalı, aşağı kıvrık
+                p.moveTo(sx - 14 + lx, y - 4)
+                p.quadTo(sx + lx, y + 8, sx + 14 + lx, y - 4)
+            else:               # ^ ^ mutlu
+                p.moveTo(sx - 13 + lx, y + 4)
+                p.quadTo(sx + lx, y - 12, sx + 13 + lx, y + 4)
+            cv.drawPath(p, stroke(OUTLINE, 6))
+    elif expr == "love":
+        for sx in (-dx, dx):
+            heart(cv, sx + lx, y + 2, 26, C("#ff3b5c"))
     elif expr == "blink":
         for sx in (-dx, dx):
             cv.drawLine(sx - 11 + lx, y, sx + 11 + lx, y, stroke(OUTLINE, 6))
@@ -317,6 +337,28 @@ def draw_eyes(cv, look, expr, dx=36, y=-4):
 
 def draw_mouth(cv, expr, look, y=48, color=OUTLINE, open_amt=0.0):
     lx = look * 8
+    if expr == "wail":
+        path = skia.Path()
+        path.moveTo(lx - 24, y + 14)
+        path.quadTo(lx, y - 16, lx + 24, y + 14)
+        path.close()
+        cv.drawPath(path, fill(C("#5a1f1f")))
+        cv.drawPath(path, stroke(color, 4))
+        return
+    if expr == "chew":
+        k = open_amt
+        cv.drawOval(skia.Rect.MakeXYWH(lx - 14, y - 4 - 6 * k, 28, 8 + 12 * k), fill(C("#5a1f1f")))
+        cv.drawOval(skia.Rect.MakeXYWH(lx - 14, y - 4 - 6 * k, 28, 8 + 12 * k), stroke(color, 4))
+        return
+    if expr in ("smile", "happy", "love", "shy") and open_amt > 0.05:
+        path = skia.Path()
+        h = 8 + 18 * open_amt
+        path.moveTo(lx - 20, y - 4)
+        path.quadTo(lx, y - 4 + h * 1.6, lx + 20, y - 4)
+        path.close()
+        cv.drawPath(path, fill(C("#5a1f1f")))
+        cv.drawPath(path, stroke(color, 4))
+        return
     if expr in ("scared", "surprised") or open_amt > 0.05:
         h = 14 + 14 * max(open_amt, 0.6 if expr == "scared" else 0.45)
         cv.drawOval(skia.Rect.MakeXYWH(lx - 13, y - h / 2, 26, h), fill(C("#5a1f1f")))
@@ -324,7 +366,7 @@ def draw_mouth(cv, expr, look, y=48, color=OUTLINE, open_amt=0.0):
     elif expr == "tired":
         cv.drawOval(skia.Rect.MakeXYWH(lx - 16, y - 10, 32, 22), fill(C("#5a1f1f")))
         cv.drawOval(skia.Rect.MakeXYWH(lx - 16, y - 10, 32, 22), stroke(color, 4))
-    elif expr == "smile":
+    elif expr in ("smile", "happy", "love", "shy"):
         path = skia.Path()
         path.moveTo(lx - 20, y - 4)
         path.quadTo(lx, y + 14, lx + 20, y - 4)
@@ -419,11 +461,16 @@ class Arda(Figure):
         cv.drawCircle(0, 0, r, stroke(OUTLINE, LW))
         # kaşlar
         by = -38 if expr not in ("scared", "surprised") else -52
-        tilt = {"scared": 8, "worried": 8, "tired": 6, "angry": -8}.get(expr, 0)
+        tilt = {"scared": 8, "worried": 8, "tired": 6, "angry": -8, "cry": 12}.get(expr, 0)
         for sx in (-1, 1):
             cv.drawLine(sx * 22 + look * 9, by - tilt, sx * 52 + look * 9, by + tilt * 0.3,
                         stroke(self.hair_dark, 8))
         draw_eyes(cv, look, "neutral" if expr == "worried" else expr)
+        if kw.get("blush"):
+            for sx in (-58, 58):
+                cv.drawOval(skia.Rect.MakeXYWH(sx - 18, 14, 36, 16), fill(C("#ff7b8a", int(150 * kw["blush"]))))
+        if expr == "cry":
+            tears(cv, look, kw.get("t", 0.0))
         # kıvırcık saç (üst)
         for i in range(13):
             ang = math.radians(185 + i * 14.2)
@@ -552,6 +599,45 @@ class Girl(Figure):
         # kirpik
         for sx in (-34, 34):
             cv.drawLine(sx + look * 10 + 9, -4, sx + look * 10 + 16, -10, stroke(OUTLINE, 4))
-        circle(cv, -50, 40, 12, C("#f3a7a0", 160), outline=False)
-        circle(cv, 50, 40, 12, C("#f3a7a0", 160), outline=False)
-        draw_mouth(cv, expr if expr != "neutral" else "flat", look, y=56)
+        bl = kw.get("blush", 0.0)
+        for sx in (-50, 50):
+            cv.drawOval(skia.Rect.MakeXYWH(sx - 14 - 6 * bl, 32, 28 + 12 * bl, 16 + 4 * bl),
+                        fill(C("#f38a90", int(150 + 100 * bl))))
+        draw_mouth(cv, expr if expr != "neutral" else "flat", look, y=58, open_amt=kw.get("mouth", 0.0))
+
+
+def heart(cv, x, y, size, color, alpha=255):
+    s_ = size / 2
+    p = skia.Path()
+    p.moveTo(x, y + s_ * 0.9)
+    p.cubicTo(x - s_ * 1.6, y - s_ * 0.2, x - s_ * 0.7, y - s_ * 1.4, x, y - s_ * 0.5)
+    p.cubicTo(x + s_ * 0.7, y - s_ * 1.4, x + s_ * 1.6, y - s_ * 0.2, x, y + s_ * 0.9)
+    cv.drawPath(p, fill(skia.ColorSetA(color, alpha)))
+    cv.drawPath(p, stroke(skia.ColorSetARGB(alpha, 26, 26, 26), max(2, size * 0.08)))
+
+
+def tears(cv, look, t):
+    """Gözlerden akan iki şerit gözyaşı + düşen damlalar."""
+    lx = look * 10
+    for sx in (-36, 36):
+        p = skia.Path()
+        p.moveTo(sx + lx - 8, 4)
+        p.lineTo(sx + lx + 8, 4)
+        p.lineTo(sx + lx + 12, 120)
+        p.lineTo(sx + lx - 12, 120)
+        p.close()
+        cv.drawPath(p, fill(C("#7fc8ff", 220)))
+        cv.drawPath(p, stroke(C("#2b6ea8", 200), 3))
+        for k in range(2):
+            ph = (t * 1.8 + k * 0.5 + (0.3 if sx > 0 else 0)) % 1.0
+            yy = 120 + ph * 140
+            cv.drawCircle(sx + lx + (k - 0.5) * 14, yy, 9 * (1 - ph * 0.4), fill(C("#7fc8ff", int(255 * (1 - ph)))))
+
+
+def hold_hands(cv, p, q, skin_a, skin_b):
+    """İki el arasında tutuşma: ortada kenetlenmiş iki el."""
+    mx, my = (p[0] + q[0]) / 2, (p[1] + q[1]) / 2
+    limb(cv, p, (mx, my), 26, skin_a)
+    limb(cv, q, (mx, my), 26, skin_b)
+    circle(cv, mx - 8, my, 21, skin_a)
+    circle(cv, mx + 8, my + 2, 20, skin_b)
