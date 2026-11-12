@@ -44,7 +44,7 @@ def build_timeline():
             spoken = ln.get("tts", ln["text"])
             spk = ln.get("speaker", "narrator")
             if spoken:
-                sig = audio.tts(spoken, spk)
+                sig = audio.tts(spoken, spk, ln.get("rate"), ln.get("pitch"))
                 dur = len(sig) / audio.SR
                 voice.append((sig, t))
             else:

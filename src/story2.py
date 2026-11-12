@@ -12,14 +12,14 @@ SCENES = [
     dict(scene="meet", pre=0.3, post=0.4, lines=[
         dict(text="Arda nefesini toparladı ve kıza doğru bir adım attı."),
         dict(text="Biz Çorumluyuz gari! Siz nerelisiniz güzzzüm?", speaker="arda",
-             tts="Biz Çorumluyuz gari! Siz nerelisiniz güzüüm?"),
+             tts="Biz Çorumluyuz gari! Siz nerelisiniz güzzüm?", rate="+0%"),
         dict(text="Ben Yozgatlıyım, köylü gızıyım. Adım Hayriye.", speaker="hayriye"),
         dict(text="Ne oluyo bu şehirde, heç anlamıyom!", speaker="hayriye"),
         dict(text="Hayriye, köyünden Çorum'a daha bu sabah gelmişti."),
     ]),
     dict(scene="love", pre=0.3, post=0.4, lines=[
         dict(text="Arda'nın kalbi, askerleri gördüğü andan bile hızlı atıyordu.", sfx=[(0.0, "love")]),
-        dict(text="Ben seni çok sevdim. Sen beni her gece doyurursun.", speaker="arda"),
+        dict(text="Ben seni çok sevdim. Sen beni her gece doyurursun.", speaker="arda", rate="-4%"),
         dict(text="Hayriye utançla gülümsedi ve Arda'nın elini tuttu.", sfx=[(0.6, "pop")]),
     ]),
     dict(scene="run2", pre=0.1, post=0.3, lines=[
@@ -34,7 +34,8 @@ SCENES = [
     ]),
     dict(scene="cry", pre=0.2, post=0.5, lines=[
         dict(text="Arda birden ağlamaya başladı. Hayriye'ye baktı ve...", sfx=[(0.8, "sob")]),
-        dict(text="Ama Çorum'da havaalanı yok ki!", speaker="arda", sfx=[(0.0, "sob")]),
+        dict(text="Ama Çorum'da havaalanı yok ki!", speaker="arda", rate="-12%", pitch="+20Hz",
+             tts="Ama... Çorum'da havaalanı yok ki!", sfx=[(0.0, "sob")]),
     ]),
     dict(scene="watch2", pre=0.2, post=0.4, lines=[
         dict(text="Hemen akıllı saatine baktı.", sfx=[(0.0, "buzz")]),
@@ -49,7 +50,7 @@ SCENES = [
     dict(scene="leblebi", pre=0.1, post=0.4, lines=[
         dict(text="Arda'nın evine doğru koşmaya başladılar.", sfx=[(0.0, "whoosh")]),
         dict(text="Arda, eşofmanının cebinde kalan son leblebileri Hayriye'ye uzattı."),
-        dict(text="Al güzzüm, Çorum leblebisi!", speaker="arda", tts="Al güzüm, Çorum leblebisi!"),
+        dict(text="Al güzzüm, Çorum leblebisi!", speaker="arda", tts="Al güzzüm, Çorum leblebisi!"),
         dict(text="Ay, pek güzelmiş gari!", speaker="hayriye", sfx=[(0.0, "crunch"), (0.5, "crunch")]),
     ]),
     dict(scene="end2", pre=0.3, post=1.6, lines=[

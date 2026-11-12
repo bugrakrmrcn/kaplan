@@ -65,22 +65,60 @@ def _voice_fx(path_in, path_out, params):
     out.save(path_out, "WAV")
 
 
-def tts(text, voice="narrator"):
-    """Metni seslendirir, önbellekler ve float32 mono dizi döndürür."""
-    os.makedirs(CACHE, exist_ok=True)
-    key = hashlib.md5(f"{text}|{LENGTH_SCALE}".encode()).hexdigest()[:12]
-    path = os.path.join(CACHE, key + ".wav")
-    if not os.path.exists(path):
-        subprocess.run([sys.executable, "-m", "piper", "-m", VOICE, "-f", path,
-                        "--length-scale", str(LENGTH_SCALE), "--noise-scale", "0.6"],
-                       input=text.encode(), check=True, capture_output=True)
+# Doğal nöral sesler (Microsoft Edge "okuma" sesleri): Emel (kadın), Ahmet (erkek).
+# Erişilemezse Piper'a düşülür.
+EDGE = {
+    "narrator": ("tr-TR-AhmetNeural", "-6%", "-6Hz"),
+    "arda": ("tr-TR-AhmetNeural", "+6%", "+4Hz"),
+    "hayriye": ("tr-TR-EmelNeural", "+4%", "+6Hz"),
+}
+ENGINE = os.environ.get("TTS_ENGINE", "edge")
+
+
+def _edge(text, voice, rate, pitch, path):
+    import asyncio
+
+    import edge_tts
+    proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
+    mp3 = path[:-4] + ".mp3"
+
+    async def go():
+        await edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, proxy=proxy).save(mp3)
+    asyncio.run(go())
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", mp3, "-ac", "1", "-ar", str(SR), path], check=True)
+    os.remove(mp3)
+
+
+def _piper(text, voice, path):
+    raw = path[:-4] + "_raw.wav"
+    subprocess.run([sys.executable, "-m", "piper", "-m", VOICE, "-f", raw,
+                    "--length-scale", str(LENGTH_SCALE), "--noise-scale", "0.6"],
+                   input=text.encode(), check=True, capture_output=True)
     params = VOICES.get(voice)
     if params:
-        vpath = os.path.join(CACHE, f"{key}_{voice}_" + "_".join(map(str, params)) + ".wav")
-        if not os.path.exists(vpath):
-            _voice_fx(path, vpath, params)
-        path = vpath
-    v = trim(read_wav(path))
+        _voice_fx(raw, path, params)
+        os.remove(raw)
+    else:
+        os.replace(raw, path)
+
+
+def tts(text, voice="narrator", rate=None, pitch=None):
+    """Metni konuşmacının sesiyle seslendirir, önbellekler ve float32 mono dizi döndürür."""
+    os.makedirs(CACHE, exist_ok=True)
+    ev, er, ep = EDGE.get(voice, EDGE["narrator"])
+    er, ep = rate or er, pitch or ep
+    key = hashlib.md5(f"{ENGINE}|{text}|{voice}|{ev}|{er}|{ep}|{LENGTH_SCALE}".encode()).hexdigest()[:14]
+    path = os.path.join(CACHE, key + ".wav")
+    if not os.path.exists(path):
+        if ENGINE == "edge":
+            try:
+                _edge(text, ev, er, ep, path)
+            except Exception as e:  # ağ yoksa çevrimdışı sese düş
+                print("  edge-tts başarısız, Piper kullanılıyor:", e)
+                _piper(text, voice, path)
+        else:
+            _piper(text, voice, path)
+    v = trim(read_wav(path), 0.005)
     v = v / (np.abs(v).max() + 1e-6) * 0.9
     return v
 

@@ -60,61 +60,98 @@ def name_tag(cv, t, t0, t1, name, sub, color):
 
 
 def car(cv, x, y, s=1.0, lights=1.0):
-    """Arda'nın arabası: 2023 model, koyu gri hatchback (Urban paket). Plaka 35 ATF 3162. Logo çizilmez."""
+    """Arda'nın arabası: 2023 model Fiat Egea Hatchback (Urban), koyu gri, plaka 35 ATF 3162.
+
+    Arka-yan (3/4) görünüm: sağda yan profil (önü sağa bakar), solda arka kapak; plaka ve FIAT
+    yazısı arka kapakta.
+    """
     cv.save()
     cv.translate(x, y)
     cv.scale(s, s)
-    body = C("#3d4148")
-    dark = C("#2a2d33")
-    glass = C("#22303d")
-    cv.drawOval(skia.Rect.MakeXYWH(-430, -30, 860, 60), fill(C("#000000", 110), blur=10))
-    # gövde silüeti (ön sağda, arka bagaj kapağı solda eğimli)
-    path = skia.Path()
-    path.moveTo(-410, -40)
-    path.lineTo(-420, -150)
-    path.quadTo(-410, -215, -350, -250)       # eğimli arka bagaj kapağı
-    path.lineTo(-250, -300)
-    path.quadTo(-200, -318, -120, -320)       # tavan
-    path.lineTo(80, -318)
-    path.quadTo(150, -312, 210, -250)         # ön cam eğimi
-    path.lineTo(300, -190)
-    path.quadTo(410, -175, 425, -120)         # kaput ve burun
-    path.lineTo(430, -40)
-    path.close()
-    cv.drawPath(path, fill(body))
-    cv.drawPath(path, stroke(OUTLINE, 6))
-    # camlar
-    poly(cv, [(-330, -235), (-245, -285), (-150, -296), (-150, -215), (-345, -215)], glass)
-    poly(cv, [(-130, -298), (40, -298), (40, -215), (-130, -215)], glass)
-    poly(cv, [(60, -298), (110, -294), (185, -220), (60, -215)], glass)
-    cv.drawLine(-100, -292, -125, -228, stroke(C("#ffffff", 70), 7))
-    # tavan rayları (Urban)
-    cv.drawLine(-260, -324, 60, -326, stroke(C("#15171b"), 10))
-    # kapı çizgileri, kollar, alt marşpiyel
-    cv.drawLine(-140, -215, -150, -60, stroke(dark, 4))
-    cv.drawLine(50, -215, 60, -60, stroke(dark, 4))
-    rrect(cv, -110, -180, 46, 10, 5, C("#8c9096"), lw=3)
-    rrect(cv, 85, -180, 46, 10, 5, C("#8c9096"), lw=3)
-    cv.drawLine(-380, -150, 400, -140, stroke(C("#55595f"), 3))
-    rrect(cv, -400, -62, 820, 26, 10, C("#1c1e22"), lw=4)
-    # LED farlar ve stoplar
-    poly(cv, [(330, -175), (405, -160), (415, -138), (330, -150)], C("#e8f2ff"))
+    body = C("#454a52")
+    body_d = C("#33373e")
+    body_l = C("#5a6069")
+    glass = C("#1f2a36")
+    chrome = C("#c9ced6")
+    cv.drawOval(skia.Rect.MakeXYWH(-640, -40, 1110, 70), fill(C("#000000", 120), blur=12))
+    # uzak arka teker (arka yüzün altında)
+    circle(cv, -420, -26, 56, C("#151515"))
+
+    # ---- yan profil (hatchback: kısa arka, eğimli arka kapak)
+    side = skia.Path()
+    side.moveTo(-330, -40)
+    side.lineTo(-338, -170)
+    side.quadTo(-330, -245, -290, -300)       # arka kapak
+    side.quadTo(-180, -322, -40, -324)        # tavan
+    side.lineTo(40, -320)
+    side.quadTo(110, -310, 215, -225)         # yatık ön cam
+    side.quadTo(360, -206, 412, -176)         # kaput
+    side.quadTo(442, -152, 444, -108)         # burun
+    side.lineTo(440, -40)
+    side.close()
+    cv.drawPath(side, fill(body))
+    cv.drawPath(side, stroke(OUTLINE, 6))
+    pth = skia.Path()                          # belirgin omuz çizgisi
+    pth.moveTo(-336, -182)
+    pth.quadTo(20, -198, 410, -170)
+    cv.drawPath(pth, stroke(body_l, 5))
+    # yan camlar + krom çıta (arkada daralan çeyrek cam)
+    win = skia.Path()
+    win.moveTo(-300, -226)
+    win.quadTo(-292, -268, -268, -290)
+    win.quadTo(-160, -304, -40, -304)
+    win.lineTo(36, -300)
+    win.quadTo(96, -290, 186, -224)
+    win.close()
+    cv.drawPath(win, fill(glass))
+    cv.drawPath(win, stroke(chrome, 5))
+    cv.drawLine(-205, -300, -218, -226, stroke(body_d, 12))     # C direği
+    cv.drawLine(-60, -304, -70, -224, stroke(body_d, 12))       # B direği
+    cv.drawLine(-20, -296, -38, -234, stroke(C("#ffffff", 60), 8))
+    cv.drawLine(-70, -224, -78, -62, stroke(body_d, 4))         # kapı çizgileri
+    cv.drawLine(-218, -226, -226, -150, stroke(body_d, 4))
+    cv.drawLine(-226, -150, -246, -62, stroke(body_d, 4))
+    cv.drawLine(150, -228, 160, -62, stroke(body_d, 4))
+    rrect(cv, -190, -172, 42, 10, 5, chrome, lw=3)
+    rrect(cv, -40, -172, 42, 10, 5, chrome, lw=3)
+    poly(cv, [(176, -232), (212, -238), (216, -212), (184, -208)], body_d, lw=4)   # ayna
+    rrect(cv, -326, -66, 760, 28, 10, C("#1c1e22"), lw=4)
+    # far + LED gündüz ışığı
+    poly(cv, [(342, -182), (420, -166), (436, -144), (350, -152)], C("#e6f0ff"))
+    cv.drawLine(352, -154, 430, -148, stroke(C("#9fd0ff"), 3))
     if lights > 0:
-        glow(cv, 420, -150, 320, C("#dceaff"), int(120 * lights))
-    poly(cv, [(-418, -190), (-372, -200), (-372, -160), (-420, -150)], C("#d6283a"))
-    glow(cv, -400, -170, 120, C("#ff2a3a"), 60)
-    # plaka (35 ATF 3162)
-    rrect(cv, -140, -112, 280, 46, 6, C("#ffffff"), lw=4)
-    rrect(cv, -140, -112, 30, 46, 6, C("#1e4fb5"), outline=False)
-    text(cv, "35 ATF 3162", 14, -77, 30, C("#111111"))
-    # alaşım jantlar
-    for wx in (-270, 270):
-        circle(cv, wx, -30, 74, C("#1a1a1a"))
-        circle(cv, wx, -30, 44, C("#9aa0a8"), lw=4)
-        for k in range(5):
-            ang = k * 2 * math.pi / 5
-            cv.drawLine(wx, -30, wx + math.cos(ang) * 40, -30 + math.sin(ang) * 40, stroke(C("#3a3d42"), 7))
-        circle(cv, wx, -30, 10, C("#3a3d42"), lw=3)
+        glow(cv, 440, -152, 300, C("#dceaff"), int(110 * lights))
+    poly(cv, [(-338, -192), (-300, -190), (-300, -168), (-338, -166)], C("#c81e2c"))  # stop (yana sarılan)
+    poly(cv, [(-200, -322), (-170, -340), (-160, -324)], body_d, lw=3)                  # köpek balığı anten
+    cv.drawLine(-250, -326, 20, -328, stroke(C("#16181c"), 8))                          # tavan rayı
+    for wx in (-205, 290):                                                              # alaşım jantlar
+        circle(cv, wx, -30, 76, C("#151515"))
+        circle(cv, wx, -30, 48, C("#a9afb8"), lw=4)
+        for k in range(10):
+            ang = k * 2 * math.pi / 10
+            cv.drawLine(wx + math.cos(ang) * 12, -30 + math.sin(ang) * 12,
+                        wx + math.cos(ang) * 44, -30 + math.sin(ang) * 44, stroke(C("#4a4e55"), 5))
+        circle(cv, wx, -30, 12, C("#2a2d33"), lw=3)
+
+    # ---- arka kapak yüzü (3/4 perspektif, tavanın arka köşesine bağlı, uzakta daralır)
+    poly(cv, [(-290, -300), (-338, -170), (-330, -40), (-505, -30), (-512, -160), (-470, -288)], body_d)
+    poly(cv, [(-298, -288), (-332, -200), (-505, -192), (-472, -278)], glass)          # arka cam
+    poly(cv, [(-300, -306), (-290, -300), (-470, -288), (-478, -296)], body, lw=4)     # tavan spoyleri
+    cv.drawLine(-440, -200, -370, -246, stroke(C("#111111"), 4))                       # silecek
+    poly(cv, [(-338, -190), (-380, -189), (-382, -165), (-338, -166)], C("#c81e2c"))   # stoplar
+    poly(cv, [(-512, -186), (-470, -187), (-468, -163), (-511, -162)], C("#c81e2c"))
+    glow(cv, -360, -178, 100, C("#ff2a3a"), int(70 + 40 * lights))
+    glow(cv, -492, -175, 100, C("#ff2a3a"), int(70 + 40 * lights))
+    cv.drawLine(-380, -177, -470, -175, stroke(chrome, 4))
+    text(cv, "FIAT", -424, -136, 24, chrome)                                           # arka logo yazısı
+    cv.save()                                                                          # plaka
+    cv.translate(-422, -92)
+    rrect(cv, -74, -18, 148, 36, 4, C("#ffffff"), lw=3)
+    rrect(cv, -74, -18, 17, 36, 4, C("#1e4fb5"), outline=False)
+    text(cv, "TR", -65.5, 13, 9, C("#ffffff"))
+    text(cv, "35 ATF 3162", 8, 7, 19, C("#111111"))
+    cv.restore()
+    poly(cv, [(-331, -62), (-330, -40), (-505, -30), (-506, -52)], C("#1c1e22"), lw=4)  # tampon
     cv.restore()
 
 
