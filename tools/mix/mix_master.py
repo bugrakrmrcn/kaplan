@@ -110,7 +110,9 @@ def delay(x, t, fb, n=4):
 voc = load("vocals")
 orig = load("orig") if os.path.exists(os.path.join(STEMS, "orig.wav")) else None
 # beat = orijinal - vokal: ayırmanın kaybettiği hiçbir şey kaybolmaz
-beat_raw = orig - voc
+raw = load("vocals_raw") if os.path.exists(os.path.join(STEMS, "vocals_raw.wav")) else voc
+beat_raw = orig - raw   # orijinal ayrılmış vokali çıkar (ayarlanmış vokal ayrıca eklenecek)
+dbl = load("doubles") if os.path.exists(os.path.join(STEMS, "doubles.wav")) else None
 N = voc.shape[1]
 rep = {}
 rep["in_vocal_lufs"] = lufs(voc)
@@ -131,6 +133,15 @@ comp = Pedalboard([
     Compressor(threshold_db=-14, ratio=2.5, attack_ms=15, release_ms=140),
 ])
 v = comp(v, SR)
+# pürüzsüzlük: 2.5-5 kHz sertliğini yalnızca yüksek anlarda kıs (dinamik EQ)
+hb = band(v, 2500, 5000)
+he = env_follow(hb.mean(0), 0.002, 0.08)
+hthr = db(np.percentile(he[he > 1e-5], 85))
+hg = 10 ** (-np.clip(db(he) - hthr, 0, 6) * 0.5 / 20)
+v = v - hb + hb * hg
+if dbl is not None:
+    d2 = Pedalboard([HighpassFilter(220), PeakFilter(300, -4, 0.9), LowpassFilter(9000),
+                     Compressor(threshold_db=-26, ratio=6, attack_ms=3, release_ms=60)])(dbl, SR)
 # paralel saturasyon (sıcaklık)
 v = v + np.tanh(v * 3.0) / 3.0 * 0.18
 v = exciter(v, mix_db=-17)
@@ -138,6 +149,9 @@ v = HighpassFilter(85)(v, SR)
 # vokali mono'ya yakın merkezle (ayırma kaynaklı stereo titreşimi azalt)
 mid = v.mean(0, keepdims=True)
 v = mid * 0.9 + v * 0.1
+if dbl is not None:   # double'ları ana vokalin 14 dB altında, iki yana aç
+    d2 = d2 * (np.sqrt(np.mean(v ** 2)) / (np.sqrt(np.mean(d2 ** 2)) + 1e-9)) * 10 ** (-14 / 20)
+    v = v + d2
 
 # ------------------------------------------------------------------ BEAT
 # beat: 28 Hz altı temizle, 120 Hz altı mono, 300 Hz üstünde hafif genişlik
@@ -166,8 +180,10 @@ v = v * 10 ** (gv / 20)
 rep["vocal_gain_db"] = gv
 
 # ------------------------------------------------------------------ FX (gönder)
-rv = Pedalboard([Reverb(room_size=0.32, damping=0.6, wet_level=1.0, dry_level=0.0, width=1.0),
-                 HighpassFilter(350), LowpassFilter(7500)])(v, SR)
+pre = int(0.025 * SR)   # 25 ms ön gecikme: vokal net, kuyruk pürüzsüz
+v_pre = np.pad(v, ((0, 0), (pre, 0)))[:, :N]
+rv = Pedalboard([Reverb(room_size=0.45, damping=0.7, wet_level=1.0, dry_level=0.0, width=1.0),
+                 HighpassFilter(400), LowpassFilter(6500)])(v_pre, SR)
 dl = delay(v, BEAT / 2, 0.35)                          # 1/8 nota ping-pong
 dl = Pedalboard([HighpassFilter(400), LowpassFilter(5000)])(dl.astype(np.float32), SR)
 fx_duck = 10 ** (-6 * np.clip((db(venv) - vthr) / 10.0, 0, 1) / 20)   # vokal konuşurken yankıyı kıs
@@ -189,6 +205,9 @@ mb = Pedalboard([
 ])
 mix = mb(mix.astype(np.float32), SR)
 mix = exciter(mix, lo=6000, drive=3.0, mix_db=-24)
+# hafif bant saturasyonu (yapıştırıcı, sıcak)
+pk = np.abs(mix).max() + 1e-9
+mix = (np.tanh(mix / pk * 1.15) / np.tanh(1.15) * pk) * 0.25 + mix * 0.75
 
 # ton dengesi eşleştirme: tipik trap/rap master bant dağılımına (enerji payı, dB) yumuşakça yaklaş
 TB = [(20, 60, -3.0), (60, 120, -4.5), (120, 250, -9.0), (250, 500, -13.0), (500, 2000, -12.5),
