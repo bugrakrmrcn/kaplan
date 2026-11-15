@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>101 Çağrı</title>
+<meta name="theme-color" content="#0f1512">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="101">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<script>
+  // Davet anahtarı: linkten al, sakla; manifest'e ekle ki ana ekran uygulamasına taşınsın.
+  (function () {
+    var p = new URLSearchParams(location.search), k = p.get("k");
+    try { if (k) localStorage.setItem("k", k); else k = localStorage.getItem("k"); } catch (e) {}
+    window.KEY = k || "";
+    var l = document.createElement("link");
+    l.rel = "manifest";
+    l.href = "/manifest.webmanifest" + (k ? "?k=" + encodeURIComponent(k) : "");
+    document.head.appendChild(l);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #0f1512; --felt: #16221c; --card: #1b2a23; --line: #2c4036; --text: #f1ede2; --dim: #9db0a4;
+    --tile: #f4ecd8; --red: #e5484d; --green: #3fcf8e; --amber: #f5b83d; --blue: #6fb1ff;
+    --r: 18px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px);
+    min-height: 100dvh; overscroll-behavior-y: contain;
+    background: radial-gradient(120% 60% at 50% 0%, #1d2f26 0%, var(--bg) 70%) fixed;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { border: 0; cursor: pointer; }
+  h1, h2, h3, p { margin: 0; }
+  .wrap { max-width: 520px; margin: 0 auto; }
+
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .logo { width: 44px; height: 56px; border-radius: 9px; background: var(--tile); color: var(--red); font-weight: 900; font-size: 19px;
+          display: grid; place-items: center; box-shadow: 0 3px 0 #c9bfa3, 0 8px 18px rgba(0,0,0,.4); letter-spacing: -1px; flex: none; }
+  header h1 { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+  header .sub { color: var(--dim); font-size: 13px; }
+  .me { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line);
+        padding: 6px 12px 6px 6px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+
+  .av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #0f1512; flex: none; }
+  .av.sm { width: 26px; height: 26px; font-size: 11px; }
+  .av.lg { width: 52px; height: 52px; font-size: 20px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin-bottom: 14px; }
+  .banner { display: flex; gap: 12px; align-items: flex-start; }
+  .banner .ico { font-size: 26px; line-height: 1; }
+  .banner .ttl { display: block; margin-bottom: 2px; font-weight: 700; }
+  body.sheet-open .fab { display: none; }
+  body.sheet-open { overflow: hidden; }
+  .banner p, .hint { color: var(--dim); font-size: 14px; }
+  .banner ol { margin: 6px 0 0; padding-left: 20px; color: var(--dim); font-size: 14px; }
+  .warn { border-color: #6b5320; background: #2a2414; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 14px;
+         background: #25382f; font-weight: 700; font-size: 15px; transition: transform .08s, filter .15s; }
+  .btn:active { transform: scale(.97); filter: brightness(1.15); }
+  .btn.pri { background: var(--red); color: #fff; }
+  .btn.ok { background: var(--green); color: #06281a; }
+  .btn.ghost { background: transparent; border: 1px solid var(--line); }
+  .btn.sm { min-height: 38px; padding: 0 12px; font-size: 14px; border-radius: 11px; }
+  .btn.full { width: 100%; }
+  .btn[disabled] { opacity: .45; pointer-events: none; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  .fab { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 16px); max-width: 520px; margin: 0 auto;
+         min-height: 58px; font-size: 17px; border-radius: 18px; box-shadow: 0 10px 30px rgba(229,72,77,.35); z-index: 5; }
+
+  .call-head { display: flex; gap: 12px; align-items: center; }
+  .call-head .who { color: var(--dim); font-size: 14px; }
+  .call-head .when { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.15; }
+  .meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: #223329; font-size: 14px; }
+  .chip.sel { background: var(--tile); color: #1a1a1a; font-weight: 700; }
+  button.chip { min-height: 40px; padding: 0 14px; }
+  .note { margin-top: 10px; color: var(--text); background: #14201a; border-radius: 12px; padding: 10px 12px; font-size: 15px; }
+
+  .table { margin: 16px 0 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .seat { aspect-ratio: 3/4; border-radius: 12px; border: 2px dashed var(--line); display: grid; place-items: center; color: var(--dim); font-size: 22px; }
+  .seat.on { border: 0; background: var(--tile); color: #1a1a1a; box-shadow: 0 3px 0 #c9bfa3; padding: 6px; text-align: center; }
+  .seat.on .nm { font-size: 12px; font-weight: 800; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .status { font-weight: 700; margin-top: 8px; }
+  .status.full { color: var(--green); }
+  .status small { display: block; font-weight: 500; color: var(--dim); font-size: 14px; margin-top: 2px; }
+
+  .sec { margin-top: 18px; }
+  .sec h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); margin-bottom: 8px; }
+  .answer .row .btn { flex-direction: column; gap: 2px; min-height: 64px; font-size: 14px; }
+  .answer .row .btn span { font-size: 22px; line-height: 1; }
+  .answer .btn.cur { outline: 2px solid var(--tile); outline-offset: 2px; }
+
+  .person { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .person:first-of-type { border-top: 0; }
+  .person .nm { font-weight: 700; }
+  .person .dt { color: var(--dim); font-size: 13px; }
+  .person .grow { flex: 1; min-width: 0; }
+  .pill { font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+  .pill.in { background: rgba(63,207,142,.16); color: var(--green); }
+  .pill.maybe { background: rgba(245,184,61,.16); color: var(--amber); }
+  .pill.out { background: rgba(229,72,77,.16); color: #ff8a8e; }
+  .pill.wait { background: #223329; color: var(--dim); }
+
+  .ride { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .ride .grow { flex: 1; font-size: 15px; }
+  .ride small { color: var(--dim); display: block; font-size: 13px; }
+
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 20; display: flex; align-items: flex-end; animation: fade .15s; }
+  .sheet { width: 100%; max-width: 560px; margin: 0 auto; background: var(--felt); border-radius: 24px 24px 0 0; border: 1px solid var(--line); border-bottom: 0;
+           padding: 10px 18px calc(env(safe-area-inset-bottom) + 18px); max-height: 92dvh; overflow-y: auto; animation: up .2s ease-out; }
+  .sheet .grab { width: 42px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 14px; }
+  .sheet h2 { font-size: 20px; margin-bottom: 14px; }
+  .field { margin-bottom: 16px; }
+  .field > label { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  input[type=text], input[type=time] { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: #101a15; padding: 0 14px; font-size: 16px; }
+  input[type=time] { width: auto; min-width: 130px; }
+  .toggle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #101a15; border: 1px solid var(--line); width: 100%; text-align: left; font-weight: 600; }
+  .toggle .sw { margin-left: auto; width: 50px; height: 30px; border-radius: 999px; background: #33443b; position: relative; transition: background .15s; flex: none; }
+  .toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform .15s; }
+  .toggle.on .sw { background: var(--green); }
+  .toggle.on .sw::after { transform: translateX(20px); }
+  .stepper { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding: 0 4px; color: var(--dim); }
+  .stepper button { width: 40px; height: 40px; border-radius: 12px; background: #25382f; font-size: 20px; font-weight: 700; }
+  .stepper b { color: var(--text); font-size: 18px; min-width: 20px; text-align: center; }
+
+  .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .who-grid button { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); font-weight: 700; font-size: 17px; }
+  .empty { text-align: center; padding: 36px 16px; color: var(--dim); }
+  .empty .big { font-size: 54px; margin-bottom: 8px; }
+  .past { opacity: .7; font-size: 14px; display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line); }
+  .past:first-of-type { border-top: 0; }
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 90px); transform: translateX(-50%); background: var(--tile); color: #1a1a1a; font-weight: 700;
+           padding: 12px 18px; border-radius: 14px; z-index: 40; box-shadow: 0 8px 24px rgba(0,0,0,.4); max-width: 86vw; text-align: center; animation: up .2s; }
+  .center { min-height: 70dvh; display: grid; place-items: center; text-align: center; }
+  .noanim, .noanim .sheet { animation: none; }
+  @keyframes fade { from { opacity: 0 } }
+  @keyframes up { from { transform: translateY(24px); opacity: 0 } }
+  .toast { animation-name: tup; }
+  @keyframes tup { from { transform: translate(-50%, 16px); opacity: 0 } }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="center"><div><div class="logo" style="margin:0 auto 14px">101</div><p class="hint">Yükleniyor…</p></div></div></div>
+<div id="sheet"></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const LS = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+const COLORS = ["#f5b83d", "#6fb1ff", "#3fcf8e", "#ff8a8e", "#c79bff", "#7ee0d2"];
+
+let S = null;                       // sunucu durumu
+let me = LS.get("me", "");
+let pushState = "unknown";          // unsupported | default | denied | on | off
+let sheet = null;                   // açık alt sayfa
+let loadError = "";
+
+const isStandalone = () => window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+
+// ------------------------------------------------------------------ API
+async function api(path, body) {
+  const res = await fetch("/api/" + path, {
+    method: body ? "POST" : "GET",
+    headers: { "x-key": window.KEY, "content-type": "application/json" },
+    body: body ? JSON.stringify({ name: me, ...body }) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || "Bir hata oluştu."), { status: res.status });
+  return data;
+}
+
+async function refresh(force = true) {
+  let sig = refresh.sig;
+  try {
+    S = await api("state");
+    loadError = "";
+    if (me && !S.players.includes(me)) me = "";
+    sig = JSON.stringify({ ...S, now: 0 });
+  } catch (e) {
+    loadError = e.status === 401 ? "key" : (S ? "" : "net");
+    sig = "err:" + loadError;
+  }
+  // değişiklik yoksa ekranı yeniden çizme (dokunma anında düğme kaybolmasın)
+  if (force || sig !== refresh.sig) render();
+  refresh.sig = sig;
+  updateBadge();
+}
+
+async function act(fn, okMsg) {
+  try {
+    await fn();
+    if (okMsg) toast(okMsg);
+    await refresh();
+    return true;
+  } catch (e) {
+    toast(e.message);
+    return false;
+  }
+}
+
+function toast(msg) {
+  const t = $("#toast");
+  t.innerHTML = `<div class="toast">${esc(msg)}</div>`;
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => (t.innerHTML = ""), 2600);
+}
+
+function updateBadge() {
+  if (!S || !me || !navigator.setAppBadge) return;
+  const n = S.active.filter((c) => !c.responses[me]).length;
+  (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {});
+}
+
+// ------------------------------------------------------------------ zaman
+const pad = (n) => String(n).padStart(2, "0");
+const hhmm = (ms) => { const d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+const startOfDay = (ms) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+function dayLabel(ms) {
+  const diff = Math.round((startOfDay(ms) - startOfDay(Date.now())) / 86400000);
+  if (diff === 0) return "Bugün";
+  if (diff === 1) return "Yarın";
+  if (diff === -1) return "Dün";
+  if (diff > 1 && diff < 7) return new Date(ms).toLocaleDateString("tr-TR", { weekday: "long" });
+  return new Date(ms).toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+}
+const whenLabel = (ms) => dayLabel(ms) + " " + hhmm(ms);
+function countdown(ms) {
+  const d = ms - Date.now();
+  if (d < -60000) return "başladı";
+  if (d < 60000) return "şimdi";
+  const m = Math.round(d / 60000), h = Math.floor(m / 60);
+  if (h >= 24) return Math.floor(h / 24) + " gün sonra";
+  return (h ? h + " sa " : "") + (m % 60 ? (m % 60) + " dk " : "") + "sonra";
+}
+
+// ------------------------------------------------------------------ parçalar
+const avatar = (name, cls = "") => {
+  const i = S ? S.players.indexOf(name) : 0;
+  return `<div class="av ${cls}" style="background:${COLORS[(i + COLORS.length) % COLORS.length]}">${esc(name.slice(0, 1).toLocaleUpperCase("tr-TR"))}</div>`;
+};
+const coming = (c) => S.players.filter((p) => c.responses[p]?.status === "in");
+
+function renderCall(c) {
+  const ins = coming(c), maybes = S.players.filter((p) => c.responses[p]?.status === "maybe");
+  const waiting = S.players.filter((p) => !c.responses[p]);
+  const mine = c.responses[me];
+  const full = ins.length >= S.table;
+  const need = S.table - ins.length;
+  const ready = Math.max(c.when, ...ins.map((p) => c.responses[p].time || 0));
+  const seats = Array.from({ length: S.table }, (_, i) => ins[i]
+    ? `<div class="seat on"><div>${avatar(ins[i], "sm")}<div class="nm">${esc(ins[i])}</div></div></div>`
+    : `<div class="seat">＋</div>`).join("");
+
+  const people = S.players.map((p) => {
+    const r = c.responses[p];
+    const pill = !r ? `<span class="pill wait">bekleniyor…</span>`
+      : `<span class="pill ${r.status}">${{ in: "Geliyor", maybe: "Belki", out: "Gelemiyor" }[r.status]}</span>`;
+    const dt = !r ? (S.notif[p] ? "" : "bildirimi kapalı") : [
+      r.status !== "out" && r.time ? "en erken " + hhmm(r.time) : "",
+      r.status !== "out" ? (r.car ? "🚗 arabası var" : (c.pickups[p] ? `🚗 ${c.pickups[p]} alıyor` : "arabası yok")) : "",
+      r.note,
+    ].filter(Boolean).join(" · ");
+    return `<div class="person">${avatar(p)}<div class="grow"><div class="nm">${esc(p)}${p === c.by ? " <span class='dt'>· çağıran</span>" : ""}${p === me ? " <span class='dt'>(sen)</span>" : ""}</div><div class="dt">${esc(dt)}</div></div>${pill}</div>`;
+  }).join("");
+
+  // araç durumu
+  const going = S.players.filter((p) => c.responses[p] && c.responses[p].status !== "out");
+  const drivers = going.filter((p) => c.responses[p].car);
+  const carless = going.filter((p) => !c.responses[p].car);
+  const iDrive = mine && mine.status !== "out" && mine.car;
+  let rides = "";
+  if (going.length) {
+    const freeSeats = drivers.reduce((n, d) => n + Math.max(0, (c.responses[d].seats ?? 3) - Object.values(c.pickups).filter((x) => x === d).length), 0);
+    const head = drivers.length
+      ? `🚗 ${drivers.length} araç (${drivers.map(esc).join(", ")}) · ${freeSeats} boş koltuk`
+      : `⚠️ Henüz kimsenin arabası yok`;
+    const rows = carless.map((p) => {
+      const d = c.pickups[p];
+      const btn = iDrive && p !== me
+        ? (d === me ? `<button class="btn sm ghost" data-act="pickup" data-id="${c.id}" data-p="${esc(p)}">Vazgeç</button>`
+                    : `<button class="btn sm ok" data-act="pickup" data-id="${c.id}" data-p="${esc(p)}">Ben alırım</button>`) : "";
+      return `<div class="ride">${avatar(p, "sm")}<div class="grow">${esc(p)}<small>${d ? `${esc(d)} alıyor ✅` : "araç lazım"}</small></div>${btn}</div>`;
+    }).join("");
+    rides = `<div class="sec"><h3>Araç</h3><div class="hint" style="color:var(--text)">${head}</div>${rows}</div>`;
+  }
+
+  const ansBtn = (st, emoji, label, cls) =>
+    `<button class="btn ${cls} ${mine?.status === st ? "cur" : ""}" data-act="answer" data-id="${c.id}" data-st="${st}"><span>${emoji}</span>${label}</button>`;
+  const mineLine = mine ? `<p class="hint" style="margin-top:10px">Cevabın: <b style="color:var(--text)">${{ in: "Geliyorum", maybe: "Belki", out: "Gelemiyorum" }[mine.status]}</b>${mine.status !== "out" ? ` · ${mine.car ? "arabam var" : "arabam yok"}${mine.time ? " · en erken " + hhmm(mine.time) : ""}` : ""} — değiştirmek için dokun.</p>` : "";
+
+  const statusLine = full
+    ? `<div class="status full">Masa kuruldu ✅<small>${ready > c.when ? `Herkes en erken ${hhmm(ready)}'de hazır` : `${ins.length > S.table ? (ins.length - S.table) + " yedek var · " : ""}${countdown(c.when)}`}</small></div>`
+    : `<div class="status">${ins.length}/${S.table} kişi · ${need} kişi daha lazım<small>${maybes.length ? maybes.length + " belki · " : ""}${waiting.length ? waiting.length + " kişi cevap vermedi" : "herkes cevapladı"}</small></div>`;
+
+  return `<div class="card">
+    <div class="call-head">${avatar(c.by, "lg")}<div><div class="who">${esc(c.by)} 101 çağırıyor</div><div class="when">${esc(whenLabel(c.when))}</div></div></div>
+    <div class="meta"><span class="chip">⏱ ${countdown(c.when)}</span>${c.place ? `<span class="chip">📍 ${esc(c.place)}</span>` : ""}</div>
+    ${c.note ? `<div class="note">💬 ${esc(c.note)}</div>` : ""}
+    <div class="table">${seats}</div>
+    ${statusLine}
+    <div class="sec answer"><h3>${mine ? "Cevabını değiştir" : "Geliyor musun?"}</h3>
+      <div class="row">${ansBtn("in", "✅", "Varım", "")}${ansBtn("maybe", "🕘", "Şu saatte olur", "")}${ansBtn("out", "❌", "Yokum", "")}</div>${mineLine}</div>
+    <div class="sec"><h3>Kim ne dedi</h3>${people}</div>
+    ${rides}
+    <div class="sec row">
+      <button class="btn sm ghost" data-act="wa" data-id="${c.id}">💬 WhatsApp'a gönder</button>
+      ${waiting.filter((p) => p !== me).length ? `<button class="btn sm ghost" data-act="nudge" data-id="${c.id}">👉 Dürt (${waiting.filter((p) => p !== me).length})</button>` : ""}
+    </div>
+    ${c.by === me ? `<div class="row" style="margin-top:10px"><button class="btn sm ghost" data-act="edit" data-id="${c.id}">✏️ Düzenle</button><button class="btn sm ghost" data-act="cancel" data-id="${c.id}" style="color:#ff8a8e">İptal et</button></div>` : ""}
+  </div>`;
+}
+
+function renderBanners() {
+  let out = "";
+  if (isIOS() && !isStandalone()) {
+    out += `<div class="card warn banner"><div class="ico">📲</div><div><span class="ttl">Önce ana ekrana ekle</span><p>Bildirim alabilmen için uygulamayı ana ekrana eklemen gerekiyor:</p>
+      <ol><li>Safari'de alttaki <b>Paylaş</b> düğmesine dokun</li><li><b>Ana Ekrana Ekle</b>'yi seç</li><li>Ana ekrandaki <b>101</b> simgesinden aç</li></ol></div></div>`;
+  } else if (pushState === "default" || pushState === "off") {
+    out += `<div class="card warn banner"><div class="ico">🔔</div><div style="flex:1"><span class="ttl">Bildirimleri aç</span><p>Biri 101 çağırınca telefonuna bildirim gelsin.</p>
+      <button class="btn ok sm" data-act="push-on" style="margin-top:10px">Bildirimleri aç</button></div></div>`;
+  } else if (pushState === "denied") {
+    out += `<div class="card warn banner"><div class="ico">🔕</div><div><span class="ttl">Bildirimler kapalı</span><p>Ayarlar → Bildirimler → 101 bölümünden izin ver, sonra uygulamayı yeniden aç.</p></div></div>`;
+  } else if (pushState === "unsupported" && !isIOS()) {
+    out += `<div class="card banner"><div class="ico">ℹ️</div><div><span class="ttl">Bu tarayıcı bildirim desteklemiyor</span><p>Çağrıları yine görebilir ve cevaplayabilirsin.</p></div></div>`;
+  }
+  return out;
+}
+
+function render() {
+  const app = $("#app");
+  if (!window.KEY || loadError === "key") {
+    app.innerHTML = `<div class="center"><div><div class="logo" style="margin:0 auto 14px">101</div><h2>Davet linki gerekli</h2><p class="hint" style="margin-top:8px">Bu uygulama yalnızca davet linkiyle açılır.<br>Gruptan gönderilen linke dokun.</p></div></div>`;
+    return;
+  }
+  if (!S) {
+    app.innerHTML = `<div class="center"><div><div class="logo" style="margin:0 auto 14px">101</div><p class="hint">${loadError === "net" ? "Bağlantı kurulamadı. Tekrar deneniyor…" : "Yükleniyor…"}</p></div></div>`;
+    return;
+  }
+  if (!me) {
+    app.innerHTML = `<header><div class="logo">101</div><div><h1>101 Çağrı</h1><div class="sub">Sen kimsin?</div></div></header>
+      <div class="who-grid">${S.players.map((p) => `<button data-act="iam" data-p="${esc(p)}">${avatar(p)}${esc(p)}</button>`).join("")}</div>
+      <p class="hint" style="margin-top:16px;text-align:center">Bir kez seçmen yeterli; sonra değiştirebilirsin.</p>`;
+    return;
+  }
+  const calls = S.active.map(renderCall).join("");
+  const empty = S.active.length ? "" : `<div class="card empty"><div class="big">🀄</div><b style="color:var(--text);font-size:18px">Şu an çağrı yok</b><p style="margin-top:6px">Canın 101 çektiyse aşağıdaki düğmeye bas,<br>herkesin telefonuna bildirim gitsin.</p></div>`;
+  const past = S.past.length ? `<div class="card"><div class="sec" style="margin-top:0"><h3>Geçmiş</h3>${S.past.map((c) => `<div class="past"><span>${esc(dayLabel(c.when))} ${hhmm(c.when)} · ${esc(c.by)}${c.place ? " · " + esc(c.place) : ""}</span><span>${c.cancelled ? "iptal" : coming(c).length + " kişi"}</span></div>`).join("")}</div></div>` : "";
+  app.innerHTML = `<header><div class="logo">101</div><div><h1>101 Çağrı</h1><div class="sub">${S.active.length ? S.active.length + " aktif çağrı" : "Masa boş"}</div></div>
+      <button class="me" data-act="whoami">${avatar(me, "sm")}${esc(me)}</button></header>
+    ${renderBanners()}${calls}${empty}${past}
+    <button class="btn pri fab" data-act="new">🀄 101 çağrısı gönder</button>`;
+}
+
+// ------------------------------------------------------------------ alt sayfalar
+function closeSheet() { sheet = null; $("#sheet").innerHTML = ""; document.body.classList.remove("sheet-open"); }
+function openSheet(s) { sheet = s; renderSheet(); }
+
+function dayOptions() {
+  return Array.from({ length: 7 }, (_, i) => { const t = startOfDay(Date.now()) + i * 86400000 + 12 * 3600000; return { i, label: dayLabel(t) }; });
+}
+const toMs = (dayIdx, time) => { const [h, m] = time.split(":").map(Number); const d = new Date(startOfDay(Date.now())); d.setDate(d.getDate() + dayIdx); d.setHours(h, m, 0, 0); return d.getTime(); };
+function defaultTime() { const d = new Date(Date.now() + 90 * 60000); d.setMinutes(d.getMinutes() < 30 ? 30 : 60, 0, 0); return hhmm(d.getTime()); }
+
+function renderSheet() {
+  const el = $("#sheet");
+  document.body.classList.toggle("sheet-open", !!sheet);
+  if (!sheet) { el.innerHTML = ""; return; }
+  let body = "";
+  if (sheet.type === "call") {
+    const s = sheet;
+    body = `<h2>${s.id ? "Çağrıyı düzenle" : "101 çağrısı gönder"}</h2>
+      <div class="field"><label>Gün</label><div class="chips">${dayOptions().map((d) => `<button class="chip ${s.day === d.i ? "sel" : ""}" data-set="day" data-v="${d.i}">${esc(d.label)}</button>`).join("")}</div></div>
+      <div class="field"><label>Saat</label><div class="chips">${["19:00", "20:00", "21:00", "22:00"].map((t) => `<button class="chip ${s.time === t ? "sel" : ""}" data-set="time" data-v="${t}">${t}</button>`).join("")}
+        <input type="time" id="f-time" value="${esc(s.time)}"></div></div>
+      <div class="field"><label>Nerede</label><input type="text" id="f-place" placeholder="Örn. Çınar Kıraathanesi" maxlength="60" value="${esc(s.place)}">
+        ${S.places.length ? `<div class="chips" style="margin-top:8px">${S.places.slice(0, 4).map((p) => `<button class="chip" data-set="place" data-v="${esc(p)}">📍 ${esc(p)}</button>`).join("")}</div>` : ""}</div>
+      <div class="field"><label>Not (isteğe bağlı)</label><input type="text" id="f-note" placeholder="Örn. çay benden" maxlength="140" value="${esc(s.note)}"></div>
+      ${s.id ? "" : carField(s)}
+      <button class="btn pri full" data-act="send-call">${s.id ? "Kaydet ve haber ver" : "Gönder — herkese bildirim gitsin"}</button>`;
+  } else if (sheet.type === "answer") {
+    const s = sheet, c = S.active.find((x) => x.id === s.id);
+    if (!c) return closeSheet();
+    const opts = [{ v: "", l: "Tam saatinde (" + hhmm(c.when) + ")" }, ...[30, 60, 90].map((m) => ({ v: String(c.when + m * 60000), l: hhmm(c.when + m * 60000) }))];
+    body = `<h2>${s.status === "in" ? "Varım ✅" : "Şu saatte olur 🕘"}</h2>
+      <div class="field"><label>En erken ne zaman orada olursun?</label><div class="chips">${opts.map((o) => `<button class="chip ${String(s.time ?? "") === o.v ? "sel" : ""}" data-set="atime" data-v="${o.v}">${o.l}</button>`).join("")}
+        <input type="time" id="f-atime" value="${s.custom || ""}"></div></div>
+      ${carField(s)}
+      <div class="field"><label>Not (isteğe bağlı)</label><input type="text" id="f-note" placeholder="Örn. işten çıkınca gelirim" maxlength="100" value="${esc(s.note)}"></div>
+      <button class="btn ok full" data-act="send-answer">Cevabı gönder</button>`;
+  } else if (sheet.type === "whoami") {
+    body = `<h2>Ayarlar</h2>
+      <div class="field"><label>Ben kimim</label><div class="who-grid">${S.players.map((p) => `<button data-act="iam" data-p="${esc(p)}" style="${p === me ? "outline:2px solid var(--tile)" : ""}">${avatar(p)}${esc(p)}</button>`).join("")}</div></div>
+      <div class="field"><label>Bildirimler</label>
+        ${pushState === "on" ? `<div class="row"><button class="btn sm ghost" data-act="push-test">🔔 Deneme bildirimi gönder</button><button class="btn sm ghost" data-act="push-off">Kapat</button></div>`
+          : pushState === "unsupported" ? `<p class="hint">${isIOS() && !isStandalone() ? "Önce uygulamayı ana ekrana ekle." : "Bu cihaz desteklemiyor."}</p>`
+          : pushState === "denied" ? `<p class="hint">Telefon ayarlarından 101 için bildirime izin ver.</p>`
+          : `<button class="btn ok full" data-act="push-on">Bildirimleri aç</button>`}</div>
+      <div class="field"><label>Arkadaşını davet et</label><button class="btn ghost full" data-act="invite">🔗 Davet linkini paylaş</button></div>`;
+  }
+  const sc = el.querySelector(".sheet")?.scrollTop || 0, first = !el.firstChild;
+  el.innerHTML = `<div class="sheet-bg ${first ? "" : "noanim"}" data-act="close-bg"><div class="sheet"><div class="grab"></div>${body}</div></div>`;
+  el.querySelector(".sheet").scrollTop = sc;
+}
+
+function carField(s) {
+  return `<div class="field"><label>Araç</label><button class="toggle ${s.car ? "on" : ""}" data-act="toggle-car">🚗 Arabam var<div class="sw"></div></button>
+    ${s.car ? `<div class="stepper">Alabileceğim kişi <button data-act="seats" data-v="-1">−</button><b>${s.seats}</b><button data-act="seats" data-v="1">+</button></div>` : ""}</div>`;
+}
+
+function readInputs() {
+  if (!sheet) return;
+  const g = (id) => { const e = document.getElementById(id); return e ? e.value : undefined; };
+  if (g("f-time")) sheet.time = g("f-time");
+  if (g("f-place") !== undefined) sheet.place = g("f-place");
+  if (g("f-note") !== undefined) sheet.note = g("f-note");
+  if (sheet.type === "answer" && g("f-atime")) {
+    const c = S.active.find((x) => x.id === sheet.id);
+    const base = new Date(c.when), [h, m] = g("f-atime").split(":").map(Number);
+    base.setHours(h, m, 0, 0);
+    if (base.getTime() < c.when - 6 * 3600000) base.setDate(base.getDate() + 1);
+    sheet.custom = g("f-atime");
+    sheet.time = base.getTime();
+  }
+}
+
+// ------------------------------------------------------------------ bildirim aboneliği
+function keyBytes(b64) { const s = atob(b64.replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(s, (c) => c.charCodeAt(0)); }
+
+async function initPush() {
+  if (!pushSupported()) { pushState = "unsupported"; return; }
+  try {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+    if (Notification.permission === "denied") { pushState = "denied"; return; }
+    const sub = await reg.pushManager.getSubscription();
+    if (sub && Notification.permission === "granted") {
+      pushState = "on";
+      if (me) api("subscribe", { subscription: sub.toJSON() }).catch(() => {});   // adı güncel tut
+    } else pushState = Notification.permission === "granted" ? "off" : "default";
+  } catch (e) { pushState = "unsupported"; }
+}
+
+async function enablePush() {
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") { pushState = perm === "denied" ? "denied" : "default"; render(); renderSheet(); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(S.vapidKey) });
+    await api("subscribe", { subscription: sub.toJSON() });
+    pushState = "on";
+    toast("Bildirimler açıldı 🔔");
+    api("test", {}).catch(() => {});
+  } catch (e) {
+    toast("Bildirim açılamadı: " + e.message);
+  }
+  await refresh();
+  renderSheet();
+}
+
+async function disablePush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) { await api("unsubscribe", { endpoint: sub.endpoint }); await sub.unsubscribe(); }
+    pushState = "off";
+  } catch (e) { toast(e.message); }
+  await refresh();
+  renderSheet();
+}
+
+// ------------------------------------------------------------------ olaylar
+const inviteUrl = () => location.origin + "/?k=" + encodeURIComponent(window.KEY);
+
+document.addEventListener("click", async (ev) => {
+  const set = ev.target.closest("[data-set]");
+  if (set && sheet) {
+    readInputs();
+    const v = set.dataset.v;
+    if (set.dataset.set === "day") sheet.day = Number(v);
+    if (set.dataset.set === "time") sheet.time = v;
+    if (set.dataset.set === "place") sheet.place = v;
+    if (set.dataset.set === "atime") { sheet.time = v ? Number(v) : null; sheet.custom = ""; }
+    return renderSheet();
+  }
+  const t = ev.target.closest("[data-act]");
+  if (!t) return;
+  const a = t.dataset.act, id = t.dataset.id;
+  if (a === "close-bg") { if (ev.target === t) closeSheet(); return; }
+  const call = id && S.active.find((c) => c.id === id);
+
+  switch (a) {
+    case "iam":
+      me = t.dataset.p; LS.set("me", me); closeSheet();
+      await initPush(); await refresh(); break;
+    case "whoami": openSheet({ type: "whoami" }); break;
+    case "new":
+      openSheet({ type: "call", day: 0, time: defaultTime(), place: LS.get("place", ""), note: "", car: LS.get("car", "0") === "1", seats: Number(LS.get("seats", "3")) });
+      break;
+    case "edit": {
+      const diff = Math.round((startOfDay(call.when) - startOfDay(Date.now())) / 86400000);
+      openSheet({ type: "call", id, day: Math.max(0, Math.min(6, diff)), time: hhmm(call.when), place: call.place, note: call.note });
+      break;
+    }
+    case "toggle-car": readInputs(); sheet.car = !sheet.car; if (sheet.car && !sheet.seats) sheet.seats = 3; renderSheet(); break;
+    case "seats": readInputs(); sheet.seats = Math.max(0, Math.min(6, (sheet.seats || 0) + Number(t.dataset.v))); renderSheet(); break;
+    case "send-call": {
+      readInputs();
+      const s = sheet, when = toMs(s.day, s.time);
+      if (when < Date.now() - 10 * 60000) return toast("Bu saat geçmiş. İleri bir saat seç.");
+      t.disabled = true;
+      LS.set("place", s.place || "");
+      if (!s.id) { LS.set("car", s.car ? "1" : "0"); LS.set("seats", String(s.seats)); }
+      const ok = await act(() => s.id ? api("update", { id: s.id, when, place: s.place, note: s.note })
+        : api("call", { when, place: s.place, note: s.note, car: s.car, seats: s.seats }), s.id ? "Güncellendi, herkese haber verildi" : "Çağrı gönderildi 🀄");
+      if (ok) closeSheet(); else t.disabled = false;
+      break;
+    }
+    case "answer": {
+      const st = t.dataset.st, mine = call.responses[me];
+      if (st === "out") { await act(() => api("respond", { id, status: "out" }), "Tamam, gelemiyorsun olarak işaretlendi"); break; }
+      openSheet({ type: "answer", id, status: st, time: mine?.time ?? null, custom: "", note: mine?.note || "",
+                  car: mine && mine.status !== "out" ? mine.car : LS.get("car", "0") === "1", seats: mine?.seats || Number(LS.get("seats", "3")) });
+      break;
+    }
+    case "send-answer": {
+      readInputs();
+      const s = sheet;
+      t.disabled = true;
+      LS.set("car", s.car ? "1" : "0"); LS.set("seats", String(s.seats));
+      const ok = await act(() => api("respond", { id: s.id, status: s.status, time: s.time, car: s.car, seats: s.seats, note: s.note }), "Cevabın iletildi");
+      if (ok) closeSheet(); else t.disabled = false;
+      break;
+    }
+    case "pickup": await act(() => api("pickup", { id, passenger: t.dataset.p })); break;
+    case "nudge": await act(async () => { const r = await api("nudge", { id }); toast(r.nudged.length ? r.nudged.join(", ") + " dürtüldü 👉" : "Herkes cevaplamış"); }); break;
+    case "cancel": if (confirm("Çağrı iptal edilsin mi? Herkese haber verilecek.")) await act(() => api("cancel", { id }), "Çağrı iptal edildi"); break;
+    case "wa": {
+      const ins = coming(call);
+      const text = `🀄 101 çağrısı!\n${call.by} çağırıyor: ${whenLabel(call.when)}${call.place ? " · " + call.place : ""}${call.note ? "\n" + call.note : ""}\nŞu an ${ins.length}/${S.table}: ${ins.join(", ")}\nCevapla 👉 ${inviteUrl()}`;
+      location.href = "https://wa.me/?text=" + encodeURIComponent(text);
+      break;
+    }
+    case "invite": {
+      const data = { title: "101 Çağrı", text: "101 çağrı uygulaması — Safari'de aç, Ana Ekrana Ekle:", url: inviteUrl() };
+      if (navigator.share) navigator.share(data).catch(() => {});
+      else { try { await navigator.clipboard.writeText(data.url); toast("Davet linki kopyalandı"); } catch (e) { prompt("Davet linki:", data.url); } }
+      break;
+    }
+    case "push-on": await enablePush(); break;
+    case "push-off": await disablePush(); break;
+    case "push-test": await act(async () => { const r = await api("test", {}); toast(r.sent ? "Deneme bildirimi gönderildi" : "Gönderilemedi — bildirimleri kapatıp yeniden aç"); }); break;
+  }
+});
+
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", (e) => { if (e.data?.type === "refresh") refresh(); });
+setInterval(() => { if (!document.hidden && !sheet) refresh(false); }, 8000);
+setInterval(() => { if (!document.hidden && !sheet && S) render(); }, 30000);   // geri sayımı tazele
+
+(async function start() {
+  if (!window.KEY) return render();
+  await refresh();
+  await initPush();
+  render();
+})();
+</script>
+</body>
+</html>
