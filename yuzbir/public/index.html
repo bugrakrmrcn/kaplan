@@ -169,6 +169,7 @@ let me = LS.get("me", "");
 let pushState = "unknown";          // unsupported | default | denied | on | off
 let sheet = null;                   // açık alt sayfa
 let loadError = "";
+const diag = { err: "" };               // bildirim tanılama bilgisi
 
 const isStandalone = () => window.navigator.standalone === true || matchMedia("(display-mode: standalone)").matches;
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -337,6 +338,8 @@ function renderBanners() {
       <button class="btn ok sm" data-act="push-on" style="margin-top:10px">Bildirimleri aç</button></div></div>`;
   } else if (pushState === "denied") {
     out += `<div class="card warn banner"><div class="ico">🔕</div><div><span class="ttl">Bildirimler kapalı</span><p>Ayarlar → Bildirimler → 101 bölümünden izin ver, sonra uygulamayı yeniden aç.</p></div></div>`;
+  } else if (pushState === "unsupported" && isIOS()) {
+    out += `<div class="card warn banner"><div class="ico">⚠️</div><div><span class="ttl">Bu iPhone'da bildirim açılamadı</span><p>iOS 16.4 veya üstü gerekli (Ayarlar → Genel → Yazılım Güncelleme). Ayrıntı için sağ üstten adına dokun → Tanılama.</p></div></div>`;
   } else if (pushState === "unsupported" && !isIOS()) {
     out += `<div class="card banner"><div class="ico">ℹ️</div><div><span class="ttl">Bu tarayıcı bildirim desteklemiyor</span><p>Çağrıları yine görebilir ve cevaplayabilirsin.</p></div></div>`;
   }
@@ -412,11 +415,30 @@ function renderSheet() {
           : pushState === "unsupported" ? `<p class="hint">${isIOS() && !isStandalone() ? "Önce uygulamayı ana ekrana ekle." : "Bu cihaz desteklemiyor."}</p>`
           : pushState === "denied" ? `<p class="hint">Telefon ayarlarından 101 için bildirime izin ver.</p>`
           : `<button class="btn ok full" data-act="push-on">Bildirimleri aç</button>`}</div>
+      <div class="field"><label>Tanılama</label><p class="hint" id="diag" style="font-family:ui-monospace,monospace;font-size:12px;word-break:break-word">${esc(diagText())}</p></div>
       <div class="field"><label>Arkadaşını davet et</label><button class="btn ghost full" data-act="invite">🔗 Davet linkini paylaş</button></div>`;
   }
   const sc = el.querySelector(".sheet")?.scrollTop || 0, first = !el.firstChild;
   el.innerHTML = `<div class="sheet-bg ${first ? "" : "noanim"}" data-act="close-bg"><div class="sheet"><div class="grab"></div>${body}</div></div>`;
   el.querySelector(".sheet").scrollTop = sc;
+}
+
+function diagText() {
+  const m = /OS (\d+)[_.](\d+)/.exec(navigator.userAgent);
+  const yn = (v) => (v ? "evet" : "HAYIR");
+  return [
+    "iOS: " + (m ? m[1] + "." + m[2] : "?"),
+    "ana ekrandan: " + yn(isStandalone()),
+    "service worker: " + yn(diag.sw) + (diag.reg ? " (kayıtlı)" : ""),
+    "push: " + yn(diag.pm),
+    "izin: " + (("Notification" in window) ? Notification.permission : "yok"),
+    "abonelik: " + yn(diag.sub),
+    "sunucuya kayıt: " + yn(diag.saved || (S && S.notif[me])),
+    "durum: " + pushState,
+    diag.test ? "deneme: " + diag.test : "",
+    diag.err ? "HATA: " + diag.err : "",
+    "sürüm: 2",
+  ].filter(Boolean).join(" · ");
 }
 
 function carField(s) {
@@ -444,30 +466,45 @@ function readInputs() {
 function keyBytes(b64) { const s = atob(b64.replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(s, (c) => c.charCodeAt(0)); }
 
 async function initPush() {
+  diag.sw = "serviceWorker" in navigator; diag.pm = "PushManager" in window; diag.nt = "Notification" in window;
+  diag.perm = diag.nt ? Notification.permission : "-";
   if (!pushSupported()) { pushState = "unsupported"; return; }
   try {
     const reg = await navigator.serviceWorker.register("/sw.js");
+    diag.reg = true;
     if (Notification.permission === "denied") { pushState = "denied"; return; }
     const sub = await reg.pushManager.getSubscription();
+    diag.sub = !!sub;
     if (sub && Notification.permission === "granted") {
       pushState = "on";
-      if (me) api("subscribe", { subscription: sub.toJSON() }).catch(() => {});   // adı güncel tut
+      if (me) api("subscribe", { subscription: sub.toJSON() }).then(() => (diag.saved = true)).catch((e) => (diag.err = "kayıt: " + e.message));
     } else pushState = Notification.permission === "granted" ? "off" : "default";
-  } catch (e) { pushState = "unsupported"; }
+  } catch (e) { pushState = "unsupported"; diag.err = "sw: " + (e && e.message || e); }
 }
 
 async function enablePush() {
+  diag.err = "";
   try {
+    if (!pushSupported()) throw new Error("Bu cihaz/tarayıcı web bildirimini desteklemiyor");
     const perm = await Notification.requestPermission();
-    if (perm !== "granted") { pushState = perm === "denied" ? "denied" : "default"; render(); renderSheet(); return; }
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(S.vapidKey) });
+    diag.perm = perm;
+    if (perm !== "granted") { pushState = perm === "denied" ? "denied" : "default"; diag.err = "izin: " + perm; render(); renderSheet(); return; }
+    // hazır bir service worker'ı en fazla 8 sn bekle (takılırsa sebebini göster)
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, rej) => setTimeout(() => rej(new Error("service worker hazır olmadı")), 8000)),
+    ]);
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(S.vapidKey) });
+    diag.sub = true;
     await api("subscribe", { subscription: sub.toJSON() });
+    diag.saved = true;
     pushState = "on";
     toast("Bildirimler açıldı 🔔");
-    api("test", {}).catch(() => {});
+    api("test", {}).then((r) => (diag.test = r.sent + " gönderildi, " + r.failed + " hata")).catch((e) => (diag.err = "deneme: " + e.message));
   } catch (e) {
-    toast("Bildirim açılamadı: " + e.message);
+    diag.err = "abonelik: " + (e && e.message || e);
+    toast("Bildirim açılamadı: " + (e && e.message || e));
   }
   await refresh();
   renderSheet();
