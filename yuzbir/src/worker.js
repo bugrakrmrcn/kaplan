@@ -25,11 +25,13 @@ export default {
     if (url.pathname === "/manifest.webmanifest") {
       // Davet anahtarı ana ekran uygulamasına taşınsın diye start_url'e eklenir.
       const k = url.searchParams.get("k") || "";
+      const u = url.searchParams.get("u") || "";
+      const qs = [k && `k=${encodeURIComponent(k)}`, u && `u=${encodeURIComponent(u)}`].filter(Boolean).join("&");
       return new Response(JSON.stringify({
         name: "101 Çağrı",
         short_name: "101",
         description: "101 için arkadaş çağırma ve müsaitlik",
-        start_url: k ? `/?k=${encodeURIComponent(k)}` : "/",
+        start_url: qs ? `/?${qs}` : "/",
         scope: "/",
         display: "standalone",
         orientation: "portrait",
@@ -96,6 +98,7 @@ export class Group extends DurableObject {
     const route = url.pathname.replace("/api/", "");
     const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
     const who = body.name;
+    if (request.method === "POST" && route === "whoami") return this.whoami(body.endpoint);
     if (request.method === "POST" && route !== "unsubscribe" && !players.includes(who)) return bad("Bilinmeyen oyuncu.");
 
     switch (`${request.method} ${route}`) {
@@ -188,6 +191,13 @@ export class Group extends DurableObject {
     for (const n of Object.keys(subs)) subs[n] = subs[n].filter((s) => s.endpoint !== endpoint);
     await this.ctx.storage.put("subs", subs);
     return json({ ok: true });
+  }
+
+  /** Bildirim aboneliğinden cihazın sahibini bulur (telefon ismi unutursa). */
+  async whoami(endpoint) {
+    const subs = await this.subs();
+    for (const [name, list] of Object.entries(subs)) if (list.some((s) => s.endpoint === endpoint)) return json({ name });
+    return json({ name: null });
   }
 
   async testPush(who) {

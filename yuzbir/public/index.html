@@ -14,13 +14,21 @@
 <script>
   // Davet anahtarı: linkten al, sakla; manifest'e ekle ki ana ekran uygulamasına taşınsın.
   (function () {
-    var p = new URLSearchParams(location.search), k = p.get("k");
+    var p = new URLSearchParams(location.search), k = p.get("k"), u = p.get("u");
+    function ck(n) { var m = document.cookie.match(new RegExp("(?:^|; )" + n + "=([^;]*)")); return m ? decodeURIComponent(m[1]) : ""; }
     try { if (k) localStorage.setItem("k", k); else k = localStorage.getItem("k"); } catch (e) {}
-    window.KEY = k || "";
-    var l = document.createElement("link");
-    l.rel = "manifest";
-    l.href = "/manifest.webmanifest" + (k ? "?k=" + encodeURIComponent(k) : "");
-    document.head.appendChild(l);
+    try { if (!u) u = localStorage.getItem("me"); } catch (e) {}
+    window.KEY = k || ck("k") || "";
+    window.ME0 = u || ck("me") || "";
+    // manifest adresine anahtar ve isim eklenir: ana ekran simgesi ikisini de taşır
+    window.setManifest = function (name) {
+      var l = document.querySelector("link[rel=manifest]") || document.head.appendChild(Object.assign(document.createElement("link"), { rel: "manifest" }));
+      var q = [];
+      if (window.KEY) q.push("k=" + encodeURIComponent(window.KEY));
+      if (name) q.push("u=" + encodeURIComponent(name));
+      l.href = "/manifest.webmanifest" + (q.length ? "?" + q.join("&") : "");
+    };
+    window.setManifest(window.ME0);
   })();
 </script>
 <style>
@@ -165,7 +173,18 @@ const LS = { get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch
 const COLORS = ["#f5b83d", "#6fb1ff", "#3fcf8e", "#ff8a8e", "#c79bff", "#7ee0d2"];
 
 let S = null;                       // sunucu durumu
-let me = LS.get("me", "");
+let me = window.ME0 || "";
+// ismi üç yerde sakla: localStorage, çerez (400 gün) ve ana ekran simgesinin adresi
+function rememberMe(name) {
+  me = name;
+  LS.set("me", name);
+  try {
+    document.cookie = "me=" + encodeURIComponent(name) + "; max-age=34560000; path=/; samesite=lax; secure";
+    document.cookie = "k=" + encodeURIComponent(window.KEY) + "; max-age=34560000; path=/; samesite=lax; secure";
+  } catch (e) {}
+  window.setManifest(name);
+}
+if (me) rememberMe(me);
 let pushState = "unknown";          // unsupported | default | denied | on | off
 let sheet = null;                   // açık alt sayfa
 let loadError = "";
@@ -437,7 +456,7 @@ function diagText() {
     "durum: " + pushState,
     diag.test ? "deneme: " + diag.test : "",
     diag.err ? "HATA: " + diag.err : "",
-    "sürüm: 2",
+    "sürüm: 3",
   ].filter(Boolean).join(" · ");
 }
 
@@ -543,7 +562,7 @@ document.addEventListener("click", async (ev) => {
 
   switch (a) {
     case "iam":
-      me = t.dataset.p; LS.set("me", me); closeSheet();
+      rememberMe(t.dataset.p); closeSheet();
       await initPush(); await refresh(); break;
     case "whoami": openSheet({ type: "whoami" }); break;
     case "new":
@@ -610,8 +629,21 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("mess
 setInterval(() => { if (!document.hidden && !sheet) refresh(false); }, 8000);
 setInterval(() => { if (!document.hidden && !sheet && S) render(); }, 30000);   // geri sayımı tazele
 
+// Telefon ismi unuttuysa: bildirim aboneliğinden sunucuya "ben kimim" diye sor.
+async function recoverMe() {
+  if (me || !pushSupported()) return;
+  try {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+    const sub = await reg.pushManager.getSubscription();
+    if (!sub) return;
+    const r = await api("whoami", { endpoint: sub.endpoint });
+    if (r.name) rememberMe(r.name);
+  } catch (e) { diag.err = "kimlik: " + (e && e.message || e); }
+}
+
 (async function start() {
   if (!window.KEY) return render();
+  if (!me) await recoverMe();
   await refresh();
   await initPush();
   render();

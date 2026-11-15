@@ -54,6 +54,10 @@ for (const name of players) {
 await settle(); for (const n of players) take(n);
 assert.ok(Object.values((await api("state")).notif).every(Boolean), "herkes bildirime abone görünmeli");
 
+// 0) kimlik: abonelik adresinden isim bulunur; bilinmeyen adres null döner
+assert.equal((await api("whoami", { endpoint: `http://127.0.0.1:${port}/push/${encodeURIComponent("Yigü")}` })).name, "Yigü");
+assert.equal((await api("whoami", { endpoint: "http://127.0.0.1:1/yok" })).name, null);
+
 // 1) Buğra çağrı gönderir -> diğer 4 kişiye bildirim, Buğra'ya gitmez
 const when = Date.now() + 3 * 3600 * 1000;
 const { id } = await api("call", { name: "Buğra", when, place: "Çınar Kıraathanesi", note: "çay benden", car: true, seats: 3 });
