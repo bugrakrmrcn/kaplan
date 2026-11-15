@@ -2,6 +2,7 @@
 // Site (public/) + API (/api/*) + Web Push bildirimleri tek Worker'da.
 
 import { DurableObject } from "cloudflare:workers";
+import { FILES } from "./assets.gen.js";
 import { generateVapid, sendPush } from "./push.js";
 
 const TZ = "Europe/Istanbul";
@@ -49,7 +50,18 @@ export default {
       return stub.fetch(request);
     }
 
-    return env.ASSETS.fetch(request);
+    // statik dosyalar (koda gömülü)
+    const path = url.pathname === "/" ? "/index.html" : url.pathname;
+    const file = FILES[path];
+    if (!file || (request.method !== "GET" && request.method !== "HEAD")) return new Response("Bulunamadı", { status: 404 });
+    const bytes = Uint8Array.from(atob(file.b64), (c) => c.charCodeAt(0));
+    return new Response(request.method === "HEAD" ? null : bytes, {
+      headers: {
+        "content-type": file.type,
+        // sayfa ve service worker her zaman güncel gelsin; ikonlar önbelleğe alınabilir
+        "cache-control": file.type === "image/png" ? "public, max-age=86400" : "no-cache",
+      },
+    });
   },
 };
 

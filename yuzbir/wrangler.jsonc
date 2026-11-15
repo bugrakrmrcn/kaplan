@@ -3,10 +3,12 @@
   "name": "yuzbir",
   "main": "src/worker.js",
   "compatibility_date": "2026-06-01",
-  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "build": { "command": "node scripts/embed.mjs" },
   "durable_objects": { "bindings": [{ "name": "GROUP", "class_name": "Group" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Group"] }],
   "vars": { "PLAYERS": "Sarsi,Kerman,Buğra,Yigü,Arda" },
+  "workers_dev": true,
+  "preview_urls": false,
   "observability": { "enabled": true }
   // Gizli değer (wrangler secret put GROUP_KEY): davet anahtarı
 }

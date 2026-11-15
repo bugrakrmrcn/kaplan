@@ -5,6 +5,7 @@ telefonuna bildirim düşer; herkes tek dokunuşla "varım / şu saatte olur / y
 arabası olup olmadığını bildirir.
 
 - **Ücretsiz:** Cloudflare Workers ücretsiz planı (site + API + veri + bildirim tek Worker).
+- **Yayında:** https://yuzbir.7yd6fhz5ws.workers.dev (davet anahtarıyla açılır).
 - **Ek uygulama yok:** iPhone'da Safari → Paylaş → *Ana Ekrana Ekle*; bildirimler normal
   uygulama bildirimi gibi gelir (iOS 16.4+).
 - **Oyuncular:** `wrangler.jsonc` içindeki `PLAYERS` (Sarsi, Kerman, Buğra, Yigü, Arda).
@@ -57,3 +58,4 @@ node test/api.test.mjs                  # uçtan uca API (sahte push servisiyle)
 - `src/worker.js` — API ve Durable Object (çağrılar, cevaplar, araç eşleştirme, bildirim kuralları)
 - `src/push.js` — Web Push (RFC 8291 şifreleme + RFC 8292 VAPID), bağımlılıksız
 - `public/index.html` — arayüz; `public/sw.js` — bildirimleri gösteren service worker
+- `scripts/embed.mjs` — `public/` dosyalarını Worker koduna gömer (`wrangler` build adımında otomatik çalışır)
