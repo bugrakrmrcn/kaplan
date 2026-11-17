@@ -97,24 +97,91 @@ YIGU = Yigu()
 PINKS = [C("#f3b7a6"), C("#eaa18f"), C("#f6c8b5"), C("#e9b49a"), C("#d99a85"), C("#f0bfa8")]
 
 
-def ball_pair(cv, x, y, r, col, face=None, t=0.0, hairs=True, bob=0.0):
-    """İki yan yana yuvarlak (şehrin temel yapı taşı). (x, y) = alt orta nokta."""
+def _egg(cx, cy, rx, ry):
+    """Alta doğru sarkan yumurta biçimi."""
+    p = skia.Path()
+    p.moveTo(cx, cy - ry)
+    p.cubicTo(cx + rx * 0.95, cy - ry, cx + rx * 1.08, cy + ry * 0.35, cx + rx * 0.62, cy + ry * 0.82)
+    p.cubicTo(cx + rx * 0.3, cy + ry * 1.05, cx - rx * 0.3, cy + ry * 1.05, cx - rx * 0.62, cy + ry * 0.82)
+    p.cubicTo(cx - rx * 1.08, cy + ry * 0.35, cx - rx * 0.95, cy - ry, cx, cy - ry)
+    p.close()
+    return p
+
+
+def ball_pair(cv, x, y, r, col, face=None, t=0.0, hairs=True, bob=0.0, real=True):
+    """Şehrin yapı taşı: çift. real=True ise kese, dikiş, kırışık ve kıllarla; değilse sade iki yuvarlak.
+    (x, y) = alt orta nokta."""
     yy = y - r + bob
-    for sx in (-0.82, 0.82):
-        cx = x + sx * r
-        circle(cv, cx, yy, r, col, lw=max(3, r * 0.045))
+    lw = max(3, r * 0.045)
+    if not real:
+        for sx in (-0.82, 0.82):
+            cx = x + sx * r
+            circle(cv, cx, yy, r, col, lw=lw)
+            cv.drawOval(skia.Rect.MakeXYWH(cx - r * 0.55, yy - r * 0.62, r * 0.42, r * 0.26), fill(C("#ffffff", 70)))
+        cv.drawLine(x, yy - r * 0.7, x, yy + r * 0.85, stroke(shade(col, 0.75), max(2, r * 0.04)))
+    else:
+        rnd = random.Random(int(x * 13 + r * 7))
+        dark = shade(col, 0.72)
+        # üstteki kese bağlantısı (ikisini tek parça gösterir)
+        neck = skia.Path()
+        neck.moveTo(x - r * 0.75, yy - r * 0.55)
+        neck.cubicTo(x - r * 0.55, yy - r * 1.35, x + r * 0.55, yy - r * 1.35, x + r * 0.75, yy - r * 0.55)
+        neck.close()
+        # sol yumurta biraz daha aşağı sarkar (doğal asimetri)
+        eggs = [(x - r * 0.78, yy + r * 0.10, r * 0.98, r * 1.06), (x + r * 0.80, yy - r * 0.02, r * 0.95, r * 1.0)]
+        whole = skia.Path(neck)
+        for ex, ey, rx, ry in eggs:
+            whole.addPath(_egg(ex, ey, rx, ry))
+        # hacim: ışık sol üstten
+        for ex, ey, rx, ry in eggs:
+            sh = skia.GradientShader.MakeRadial(skia.Point(ex - rx * 0.35, ey - ry * 0.45), rx * 1.6,
+                                                [shade(col, 1.08), col, dark], [0.0, 0.55, 1.0])
+            cv.drawPath(_egg(ex, ey, rx, ry), skia.Paint(Shader=sh, AntiAlias=True))
+        sh = skia.GradientShader.MakeLinear([skia.Point(x, yy - r * 1.3), skia.Point(x, yy - r * 0.4)], [shade(col, 0.95), col])
+        cv.drawPath(neck, skia.Paint(Shader=sh, AntiAlias=True))
+        # dış hat
+        for ex, ey, rx, ry in eggs:
+            cv.drawPath(_egg(ex, ey, rx, ry), stroke(OUTLINE, lw))
+        cv.drawPath(neck, stroke(OUTLINE, lw))
+        for ex, ey, rx, ry in eggs:   # bağlantı çizgisini içeriden kapat
+            cv.drawPath(_egg(ex, ey, rx * 0.93, ry * 0.93), skia.Paint(Shader=skia.GradientShader.MakeRadial(
+                skia.Point(ex - rx * 0.35, ey - ry * 0.45), rx * 1.6, [shade(col, 1.08), col, dark], [0.0, 0.55, 1.0]),
+                AntiAlias=True))
+        # orta dikiş çizgisi (dalgalı)
+        seam = skia.Path()
+        seam.moveTo(x, yy - r * 1.15)
+        steps = 10
+        for k in range(1, steps + 1):
+            u = k / steps
+            seam.lineTo(x + math.sin(u * 9.4) * r * 0.05, yy - r * 1.15 + u * r * 2.05)
+        cv.drawPath(seam, stroke(shade(col, 0.6), max(2, r * 0.035)))
+        # deri kırışıklıkları
+        for ex, ey, rx, ry in eggs:
+            for k in range(6):
+                wy = ey - ry * 0.55 + k * ry * 0.26 + rnd.uniform(-4, 4)
+                ww = rx * rnd.uniform(0.35, 0.7)
+                wx = ex + rnd.uniform(-0.25, 0.25) * rx
+                q = skia.Path()
+                q.moveTo(wx - ww / 2, wy)
+                q.quadTo(wx, wy + ry * rnd.uniform(0.06, 0.12), wx + ww / 2, wy - ry * 0.02)
+                cv.drawPath(q, stroke(skia.ColorSetA(shade(col, 0.62), 150), max(1.5, r * 0.022)))
         # parlama
-        cv.drawOval(skia.Rect.MakeXYWH(cx - r * 0.55, yy - r * 0.62, r * 0.42, r * 0.26), fill(C("#ffffff", 70)))
-    cv.drawLine(x, yy - r * 0.7, x, yy + r * 0.85, stroke(shade(col, 0.75), max(2, r * 0.04)))
-    if hairs:   # birkaç komik kıl
+        for ex, ey, rx, ry in eggs:
+            cv.drawOval(skia.Rect.MakeXYWH(ex - rx * 0.6, ey - ry * 0.62, rx * 0.36, ry * 0.2), fill(C("#ffffff", 60)))
+    if hairs:   # kıvırcık kıllar
         rnd = random.Random(int(x * 7 + r))
-        for _ in range(3):
-            hx = x + rnd.uniform(-1.4, 1.4) * r
-            hy = yy + rnd.uniform(-0.2, 0.6) * r
+        for _ in range(9 if real else 3):
+            ang = rnd.uniform(-2.6, 2.6)
+            side = -0.8 if rnd.random() < 0.5 else 0.8
+            hx = x + side * r + math.sin(ang) * r * 0.95
+            hy = yy - math.cos(ang) * r * 0.95
             q = skia.Path()
             q.moveTo(hx, hy)
-            q.quadTo(hx + r * 0.12, hy + r * 0.12, hx + r * 0.05, hy + r * 0.25)
-            cv.drawPath(q, stroke(C("#5a3a2a", 160), max(1.5, r * 0.025)))
+            out = (math.sin(ang), -math.cos(ang))
+            q.cubicTo(hx + out[0] * r * 0.18 + r * 0.06, hy + out[1] * r * 0.18,
+                      hx + out[0] * r * 0.10 - r * 0.07, hy + out[1] * r * 0.28,
+                      hx + out[0] * r * 0.24, hy + out[1] * r * 0.30)
+            cv.drawPath(q, stroke(C("#4a2f22", 200), max(1.5, r * 0.022)))
     if face:
         for sx in (-0.82, 0.82):
             cx = x + sx * r
@@ -162,7 +229,7 @@ def building(cv, x, y, r, col, floors, t, seed):
 
 def tree(cv, x, y, s):
     cv.drawLine(x, y, x, y - 170 * s, stroke(C("#7a4b2a"), 26 * s))
-    ball_pair(cv, x, y - 140 * s, 70 * s, C("#5fbf62"), hairs=False)
+    ball_pair(cv, x, y - 140 * s, 70 * s, C("#5fbf62"), hairs=False, real=False)
 
 
 def cloud(cv, x, y, s, a=230):
@@ -250,7 +317,7 @@ def city(cv, scroll, t, people=True, sign=False):
     cv.save()
     cv.translate(-scroll * 0.05, 0)
     glow(cv, 860, 300, 260, C("#ffe27a"), 160)
-    ball_pair(cv, 860, 360, 62, C("#ffd34d"), face="happy", hairs=False)
+    ball_pair(cv, 860, 360, 62, C("#ffd34d"), face="happy", hairs=False, real=False)
     cv.restore()
     for i, (cx, cy, cs) in enumerate([(200, 220, 0.9), (620, 160, 0.7), (1200, 260, 1.0), (1700, 190, 0.8), (2300, 240, 0.9)]):
         cloud(cv, (cx - scroll * 0.12 + t * 12) % 2600 - 300, cy, cs)
@@ -260,8 +327,8 @@ def city(cv, scroll, t, people=True, sign=False):
     for i in range(-4, 40):
         bx = i * 260
         r = 70 + (i * 37 % 50)
-        ball_pair(cv, bx, GY - 260, r, C("#c98f86", 150), hairs=False)
-        ball_pair(cv, bx + 40, GY - 260 - r * 1.5, r * 0.8, C("#c98f86", 130), hairs=False)
+        ball_pair(cv, bx, GY - 260, r, C("#c98f86", 150), hairs=False, real=False)
+        ball_pair(cv, bx + 40, GY - 260 - r * 1.5, r * 0.8, C("#c98f86", 130), hairs=False, real=False)
     cv.restore()
     # ana cadde
     cv.save()
