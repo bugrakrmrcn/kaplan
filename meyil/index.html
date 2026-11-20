@@ -43,10 +43,12 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 18px 40px;
 }
-.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 18px; }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.wrap > * { min-width: 0; }
 h1, h2, h3 { font-family: var(--font-display); letter-spacing: .3px; margin: 0; text-wrap: balance; }
 .num, input[type=number], td.n, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-button { font: inherit; color: inherit; cursor: pointer; }
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+html { -webkit-text-size-adjust: 100%; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------------- üst bölüm */
@@ -121,6 +123,12 @@ tfoot td { font-weight: 600; background: var(--surface-2); }
 .seg button { border: 0; background: transparent; padding: 6px 14px; font-weight: 600; font-size: 13px; color: var(--muted); }
 .seg button.on { background: var(--sea); color: var(--surface); }
 footer { color: var(--muted); font-size: 12px; text-align: center; }
+details.ht { border: 1px solid var(--line); border-radius: 10px; }
+details.ht > summary { cursor: pointer; padding: 10px 12px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+details.ht > summary::-webkit-details-marker { display: none; }
+details.ht > summary::after { content: "Göster"; color: var(--sea); font-size: 13px; flex: none; }
+details.ht[open] > summary::after { content: "Gizle"; }
+details.ht > .inner { padding: 0 10px 10px; display: grid; gap: 10px; }
 
 /* HUH! baloncuğu */
 .huh { position: fixed; pointer-events: none; z-index: 50; font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--accent);
@@ -129,15 +137,51 @@ footer { color: var(--muted); font-size: 12px; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .huh { animation-duration: .01s; } #pend, #hullg { animation: none !important; } }
 
 @media (max-width: 900px) {
-  .top { grid-template-columns: 1fr; }
-  .ship { min-height: 200px; }
+  .top { grid-template-columns: minmax(0, 1fr); }
+  .ship { min-height: 190px; }
   .results { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .two { grid-template-columns: 1fr; }
+  .two { grid-template-columns: minmax(0, 1fr); }
 }
-@media (max-width: 520px) {
-  .results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kpi .v { font-size: 27px; }
-  .panel { padding: 14px; }
+/* ---------------- telefon: yatay kaydırma yok, tablolar kart olur */
+@media (max-width: 640px) {
+  body { padding-block: 12px 28px; }
+  .wrap { gap: 14px; }
+  .intro { padding: 16px; }
+  .ship { min-height: 170px; }
+  .results { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .kpi { padding: 10px 12px; }
+  .kpi .v { font-size: 26px; }
+  .minor { gap: 4px 14px; font-size: 12.5px; }
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; border-bottom: 0; overflow: visible; margin-bottom: 8px; }
+  .tab { flex-direction: column; gap: 4px; white-space: normal; text-align: center; font-size: 12.5px; line-height: 1.2; padding: 8px 4px;
+         border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .tab[aria-selected="true"] { border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+  .panel { padding: 14px; border-top: 1px solid var(--line); border-radius: var(--r); gap: 14px; }
+  .panel h2 { font-size: 22px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .out { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .out b { font-size: 15px; word-break: break-word; }
+  .formula { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+  input, select { font-size: 16px; padding: 8px 9px; }   /* iOS odaklanınca yakınlaştırmasın */
+  .tw { overflow: visible; border: 0; border-radius: 0; }
+  table.cards, table.cards tbody, table.cards tfoot { display: grid; gap: 8px; }
+  table.cards thead { display: none; }
+  table.cards tr { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 8px 10px; padding: 10px 12px;
+                   border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+  table.cards tr.hit { border-color: var(--sea); }
+  table.cards tr.bad { border-color: var(--warn); }
+  table.cards tr.hit td, table.cards tr.bad td, tfoot td { background: transparent; }
+  table.cards td { display: grid; gap: 2px; padding: 0; border: 0; white-space: normal; min-width: 0; text-align: left; font-size: 14px; }
+  table.cards td::before { content: attr(data-label); font-family: var(--font-body); font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .3px; }
+  table.cards td.n { text-align: left; padding-right: 0; }
+  table.cards td.full { grid-column: 1 / -1; }
+  table.cards td.x { grid-column: 1 / -1; justify-items: end; }
+  table.cards td.x::before { content: none; }
+  table.cards td input, table.cards td input.name, table.cards td select { min-width: 0; width: 100%; }
+  table.cards tfoot tr { background: var(--surface); border-style: dashed; }
+  table.cards td:empty { display: none; }
+  .del { font-size: 13px; border: 1px solid var(--line); padding: 4px 12px; border-radius: 999px; }
+  .del::after { content: " Sil"; }
 }
 </style>
 
@@ -333,20 +377,23 @@ function renderTop(r) {
 }
 
 // ======================================================================= sekmeler
+const HH = ["Draft", "Deplasman", "MTC", "KMT", "LCB", "LCF", "KB", "Islak yüzey"];
+let htOpen = false;
+document.addEventListener("toggle", (e) => { if (e.target.id === "ht") htOpen = e.target.open; }, true);
 const TABS = ["Draftlar", "Hidrostatik", "Meyil deneyi", "Serbest yüzey", "Ağırlıklar", "Fribord ve DWT"];
 function renderTabs() {
   $("#tabs").innerHTML = TABS.map((t, i) => `<button class="tab" role="tab" type="button" id="tab-${i}" aria-selected="${i === tab}" data-tab="${i}"><span class="no">${i + 1}</span>${t}</button>`).join("");
 }
-const num = (path, label, val, step = "any") => `<div class="field"><label for="in-${path}">${label}</label><input type="number" id="in-${path}" data-path="${path}" step="${step}" value="${val}"></div>`;
+const num = (path, label, val, step = "any") => `<div class="field"><label for="in-${path}">${label}</label><input type="number" inputmode="decimal" id="in-${path}" data-path="${path}" step="${step}" value="${val}"></div>`;
 const outs = (pairs) => `<div class="out">${pairs.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>`;
 
 function listTable(key, cols, r, totals) {
   const rows = S[key].map((row, i) => `<tr${totals?.bad?.(row, i) ? ' class="bad"' : ""}>${cols.map((c, j) => c.calc
-      ? `<td class="n">${f(c.calc(row), c.d ?? 3)}</td>`
-      : `<td><input ${j === 0 ? 'class="name" type="text"' : 'type="number" step="any"'} id="${key}-${i}-${j}" data-list="${key}" data-i="${i}" data-j="${j}" value="${esc(row[j])}"></td>`).join("")}
-      <td><button class="del" type="button" data-del="${key}" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("");
-  return `<div class="tw"><table><thead><tr>${cols.map((c) => `<th>${c.h}</th>`).join("")}<th></th></tr></thead><tbody>${rows}</tbody>
-    ${totals ? `<tfoot><tr>${totals.cells.map((c) => `<td class="n">${c}</td>`).join("")}<td></td></tr></tfoot>` : ""}</table></div>
+      ? `<td class="n" data-label="${c.h}">${f(c.calc(row), c.d ?? 3)}</td>`
+      : `<td data-label="${c.h}"${j === 0 ? ' class="full"' : ""}><input ${j === 0 ? 'class="name" type="text"' : 'type="number" inputmode="decimal" step="any"'} id="${key}-${i}-${j}" data-list="${key}" data-i="${i}" data-j="${j}" value="${esc(row[j])}" aria-label="${c.h}"></td>`).join("")}
+      <td class="x"><button class="del" type="button" data-del="${key}" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("");
+  return `<div class="tw"><table class="cards" style="--cols:3"><thead><tr>${cols.map((c) => `<th>${c.h}</th>`).join("")}<th></th></tr></thead><tbody>${rows}</tbody>
+    ${totals ? `<tfoot><tr>${totals.cells.map((c, j) => `<td class="n${j === 0 ? " full" : ""}" data-label="${j === 0 ? "" : cols[j]?.h ?? ""}">${c}</td>`).join("")}<td></td></tr></tfoot>` : ""}</table></div>
     <button class="btn add" type="button" data-add="${key}">+ Satır ekle</button>`;
 }
 
@@ -391,20 +438,21 @@ Tort = (dA + 6·Torta + dF) / 8      trim = dA − dF      θ = atan(trim / LBP)
       ${outs([["Okunan draft", f(hy.draft, 4) + " m"], ["Tablo deplasmanı", f(hy.disp, 2) + " t"], ["Gerçek deplasman", f(r.delta, 2) + " t"], ["KMT", f(hy.kmt, 4) + " m"],
         ["LCB", f(hy.lcb, 4) + " m"], ["KB", f(hy.kb, 4) + " m"], ["MTC", f(hy.mtc, 3)], ["LCF", f(hy.lcf, 3) + " m"]])}
       <div class="formula">Δgerçek = Δtablo × ρ / 1,025${auto && hy.rows ? `        (enterpolasyon: ${f(hy.rows[0], 2)} – ${f(hy.rows[1], 2)} m satırları)` : ""}</div>
-      <div class="tw"><table><thead><tr><th>Draft</th><th>Deplasman</th><th>MTC</th><th>KMT</th><th>LCB</th><th>LCF</th><th>KB</th><th>Islak yüzey</th><th></th></tr></thead><tbody>
-      ${S.hydro.map((row, i) => `<tr class="${auto && hy.rows && (row[0] === hy.rows[0] || row[0] === hy.rows[1]) ? "hit" : ""}${row[5] < 0 ? " bad" : ""}">${row.map((v, j) => `<td><input type="number" step="any" id="hydro-${i}-${j}" data-list="hydro" data-i="${i}" data-j="${j}" value="${v}"></td>`).join("")}<td><button class="del" type="button" data-del="hydro" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("")}
-      </tbody></table></div><button class="btn add" type="button" data-add="hydro">+ Satır ekle</button>`;
+      <details class="ht" id="ht"${htOpen ? " open" : ""}><summary>Hidrostatik tablo (${S.hydro.length} satır${auto && hy.rows ? `, okunan: ${f(hy.rows[0], 2)}–${f(hy.rows[1], 2)} m` : ""})</summary><div class="inner">
+      <div class="tw"><table class="cards" style="--cols:4"><thead><tr>${HH.map((x) => `<th>${x}</th>`).join("")}<th></th></tr></thead><tbody>
+      ${S.hydro.map((row, i) => `<tr class="${auto && hy.rows && (row[0] === hy.rows[0] || row[0] === hy.rows[1]) ? "hit" : ""}${row[5] < 0 ? " bad" : ""}">${row.map((v, j) => `<td data-label="${HH[j]}"><input type="number" inputmode="decimal" step="any" id="hydro-${i}-${j}" data-list="hydro" data-i="${i}" data-j="${j}" value="${v}" aria-label="${HH[j]}"></td>`).join("")}<td class="x"><button class="del" type="button" data-del="hydro" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("")}
+      </tbody></table></div><button class="btn add" type="button" data-add="hydro">+ Satır ekle</button></div></details>`;
   } else if (tab === 2) {
     const opts = (sel) => S.weights.map((w) => `<option${w.id === sel ? " selected" : ""}>${esc(w.id)}</option>`).join("");
     h = `<h2>Meyil deneyi</h2><p class="lead">Dört ağırlık ${esc(S.wpos)}'de iskele–sancak arasında 8 adımda kaydırılır. Her adımda baş ve kıç sarkaçlarının sapması okunur.</p>
       <div class="grid">${S.weights.map((w, i) => num(`weights.${i}.w`, `${esc(w.id)} ağırlığı (ton)`, w.w)).join("")}${num("dist", "Kaydırma mesafesi (m)", S.dist)}
       ${num("pendB", "Baş sarkaç boyu (mm)", S.pendB)}${num("pendK", "Kıç sarkaç boyu (mm)", S.pendK)}</div>
-      <div class="two"><div class="tw"><table><thead><tr><th>Adım</th><th>Kayan</th><th>Moment t·m</th><th>Baş okuma</th><th>Sapma</th><th>Kıç okuma</th><th>Sapma</th><th>Ort. tan</th></tr></thead><tbody>
-      <tr><td class="n">0</td><td>—</td><td class="n">—</td><td><input type="number" step="any" id="rb-0" data-read="readB" data-i="0" value="${S.readB[0]}"></td><td class="n">—</td><td><input type="number" step="any" id="rk-0" data-read="readK" data-i="0" value="${S.readK[0]}"></td><td class="n">—</td><td class="n">—</td></tr>
-      ${r.steps.map((x, i) => `<tr><td class="n">${x.k}</td><td><select id="mv-${i}" data-moved="${i}" aria-label="${x.k}. adımda kaydırılan ağırlık">${opts(x.id)}</select></td><td class="n">${f(x.mom, 2)}</td>
-        <td><input type="number" step="any" id="rb-${i + 1}" data-read="readB" data-i="${i + 1}" value="${S.readB[i + 1]}"></td><td class="n">${f(x.dB, 1)}</td>
-        <td><input type="number" step="any" id="rk-${i + 1}" data-read="readK" data-i="${i + 1}" value="${S.readK[i + 1]}"></td><td class="n">${f(x.dK, 1)}</td><td class="n">${f(x.tan, 5)}</td></tr>`).join("")}
-      </tbody><tfoot><tr><td>Ort.</td><td></td><td class="n">${f(r.Mavg, 2)}</td><td></td><td></td><td></td><td></td><td class="n">${f(r.tanAvg, 5)}</td></tr></tfoot></table></div>
+      <div class="two"><div class="tw"><table class="cards steps" style="--cols:3"><thead><tr><th>Adım</th><th>Kayan</th><th>Moment t·m</th><th>Baş okuma</th><th>Sapma</th><th>Kıç okuma</th><th>Sapma</th><th>Ort. tan</th></tr></thead><tbody>
+      <tr><td class="n" data-label="Adım">0 · başlangıç</td><td class="n" data-label="Kayan">—</td><td class="n" data-label="Moment t·m">—</td><td data-label="Baş okuma mm"><input type="number" inputmode="decimal" step="any" id="rb-0" data-read="readB" data-i="0" value="${S.readB[0]}" aria-label="Başlangıç baş okuma"></td><td class="n" data-label="Baş sapma">—</td><td data-label="Kıç okuma mm"><input type="number" inputmode="decimal" step="any" id="rk-0" data-read="readK" data-i="0" value="${S.readK[0]}" aria-label="Başlangıç kıç okuma"></td><td class="n" data-label="Kıç sapma">—</td><td class="n" data-label="Ort. tan">—</td></tr>
+      ${r.steps.map((x, i) => `<tr><td class="n" data-label="Adım">${x.k}</td><td data-label="Kayan"><select id="mv-${i}" data-moved="${i}" aria-label="${x.k}. adımda kaydırılan ağırlık">${opts(x.id)}</select></td><td class="n" data-label="Moment t·m">${f(x.mom, 2)}</td>
+        <td data-label="Baş okuma mm"><input type="number" inputmode="decimal" step="any" id="rb-${i + 1}" data-read="readB" data-i="${i + 1}" value="${S.readB[i + 1]}" aria-label="${x.k}. adım baş okuma"></td><td class="n" data-label="Baş sapma">${f(x.dB, 1)}</td>
+        <td data-label="Kıç okuma mm"><input type="number" inputmode="decimal" step="any" id="rk-${i + 1}" data-read="readK" data-i="${i + 1}" value="${S.readK[i + 1]}" aria-label="${x.k}. adım kıç okuma"></td><td class="n" data-label="Kıç sapma">${f(x.dK, 1)}</td><td class="n" data-label="Ort. tan">${f(x.tan, 5)}</td></tr>`).join("")}
+      </tbody><tfoot><tr><td class="full" data-label="">Ortalama</td><td></td><td class="n" data-label="Moment t·m">${f(r.Mavg, 2)}</td><td></td><td></td><td></td><td></td><td class="n" data-label="Ort. tan">${f(r.tanAvg, 5)}</td></tr></tfoot></table></div>
       ${chart(r)}</div>
       ${outs([["Ortalama meyil momenti", f(r.Mavg, 3) + " t·m"], ["Ortalama tanjant", f(r.tanAvg, 6)], ["Meyil açısı", f(r.heelDeg, 4) + "°"], ["G0M", f(r.G0M, 4) + " m"]])}
       <div class="formula">tan = sapma / sarkaç boyu   (baş ve kıç ortalaması)
@@ -506,6 +554,8 @@ try { sound = localStorage.getItem(KEY + "-snd") !== "0"; } catch (e) {}
 let ac = null;
 function huh() {
   try {
+    // iPhone'da sessiz moddayken de çalsın (Safari 16.4+)
+    try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (er) {}
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
     if (ac.state === "suspended") ac.resume();
     const t0 = ac.currentTime, dur = 0.34, jit = 0.92 + Math.random() * 0.16;
@@ -538,7 +588,7 @@ document.addEventListener("pointerdown", (e) => {
   if (sound) huh();
   const b = document.createElement("div");
   b.className = "huh"; b.textContent = "HUH!";
-  b.style.left = e.clientX + "px"; b.style.top = e.clientY + "px";
+  b.style.left = Math.max(40, Math.min(window.innerWidth - 40, e.clientX)) + "px"; b.style.top = Math.max(30, e.clientY) + "px";
   if (sound) { document.body.appendChild(b); setTimeout(() => b.remove(), 750); }
 }, true);
 (() => { const b = $("#b-sound"); b.classList.toggle("on", sound); b.setAttribute("aria-pressed", sound); b.textContent = "HUH sesi: " + (sound ? "açık" : "kapalı"); })();
