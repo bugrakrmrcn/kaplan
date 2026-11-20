@@ -552,12 +552,45 @@ document.addEventListener("click", async (e) => {
 let sound = true;
 try { sound = localStorage.getItem(KEY + "-snd") !== "0"; } catch (e) {}
 let ac = null;
+// Arda'nın kaydettiği gerçek "HUH!" sesi (0,52 sn, mp3, sayfaya gömülü)
+const HUH_MP3 = "data:audio/mpeg;base64,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";
+let huhBuf = null, huhLoad = null;
+function audioCtx() {
+  // iPhone'da sessiz moddayken de çalsın (Safari 16.4+)
+  try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (er) {}
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  if (ac.state === "suspended") ac.resume();
+  return ac;
+}
+function loadHuh() {
+  if (huhLoad) return huhLoad;
+  const bin = atob(HUH_MP3.split(",")[1]);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  huhLoad = new Promise((res) => {
+    try { audioCtx().decodeAudioData(bytes.buffer, (buf) => { huhBuf = buf; res(buf); }, () => res(null)); }
+    catch (e) { res(null); }
+  });
+  return huhLoad;
+}
+function playBuf(buf) {
+  const c = audioCtx(), src = c.createBufferSource(), g = c.createGain();
+  src.buffer = buf;
+  src.playbackRate.value = 0.97 + Math.random() * 0.06;   // her tıklamada tıpatıp aynı olmasın
+  g.gain.value = 1;
+  src.connect(g); g.connect(c.destination);
+  src.start();
+}
 function huh() {
   try {
-    // iPhone'da sessiz moddayken de çalsın (Safari 16.4+)
-    try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (er) {}
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-    if (ac.state === "suspended") ac.resume();
+    audioCtx();
+    if (huhBuf) return playBuf(huhBuf);
+    loadHuh().then((buf) => (buf ? playBuf(buf) : synthHuh()));
+  } catch (e) { synthHuh(); }
+}
+function synthHuh() {
+  try {
+    audioCtx();
     const t0 = ac.currentTime, dur = 0.34, jit = 0.92 + Math.random() * 0.16;
     // nefes: bant geçiren gürültü, "a/ʌ" formantları
     const n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
