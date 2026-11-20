@@ -1,0 +1,548 @@
+<title>Arda'nın Meyil Testi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Düzen: üstte gemi kesiti + özet sonuçlar, altında 6 adımlık sekmeli giriş defteri (deniz haritası tonları) */
+:root {
+  --bg: #e9f0f4;          /* harita kâğıdı mavisi */
+  --surface: #ffffff;
+  --surface-2: #f4f8fa;
+  --ink: #0f2236;
+  --muted: #557086;
+  --line: #cbd9e3;
+  --accent: #f0551e;      /* can simidi turuncusu */
+  --accent-ink: #ffffff;
+  --sea: #0e6f8f;
+  --sea-soft: #cfe7ef;
+  --ok: #1d8657;
+  --warn: #a8640f;
+  --warn-bg: #fdf1dd;
+  --hull: #24384d;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #081523; --surface: #0f2133; --surface-2: #0c1b2b; --ink: #e4edf4; --muted: #8aa3b8; --line: #1d3650;
+    --accent: #ff7440; --accent-ink: #1a0a03; --sea: #3cb3d6; --sea-soft: #12344a; --ok: #43cf8f; --warn: #f2b54a;
+    --warn-bg: #2b2210; --hull: #c9d6e2; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #081523; --surface: #0f2133; --surface-2: #0c1b2b; --ink: #e4edf4; --muted: #8aa3b8; --line: #1d3650;
+  --accent: #ff7440; --accent-ink: #1a0a03; --sea: #3cb3d6; --sea-soft: #12344a; --ok: #43cf8f; --warn: #f2b54a;
+  --warn-bg: #2b2210; --hull: #c9d6e2; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 18px; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: .3px; margin: 0; text-wrap: balance; }
+.num, input[type=number], td.n, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------------- üst bölüm */
+.top { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: stretch; }
+.intro { display: grid; align-content: space-between; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; min-width: 0; }
+.eyebrow { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.intro h1 { font-size: clamp(34px, 6vw, 52px); line-height: .95; font-weight: 700; }
+.intro h1 span { color: var(--accent); }
+.intro p { margin: 0; color: var(--muted); max-width: 60ch; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 7px 14px; font-weight: 600; font-size: 13px; }
+.btn:hover { border-color: var(--sea); }
+.btn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ship { background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 58%, var(--sea-soft) 58%); border: 1px solid var(--line); border-radius: var(--r); position: relative; overflow: hidden; min-height: 230px; }
+.ship svg { width: 100%; height: 100%; display: block; }
+.ship .cap { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted); }
+.ship .cap b { color: var(--ink); font-family: var(--font-mono); }
+
+/* ---------------- sonuç kartları */
+.results { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; min-width: 0; }
+.kpi.hero { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.kpi .k { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .4px; }
+.kpi.hero .k { color: var(--bg); opacity: .75; }
+.kpi .v { font-family: var(--font-display); font-size: 32px; font-weight: 700; line-height: 1.05; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.kpi .v small { font-family: var(--font-body); font-size: 13px; font-weight: 500; opacity: .7; margin-left: 3px; }
+.minor { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); padding: 2px 4px; }
+.minor b { color: var(--ink); font-family: var(--font-mono); font-weight: 500; }
+.warns { display: grid; gap: 6px; }
+.warn { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 9px 12px; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+.warn::before { content: "!"; flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--warn); color: var(--warn-bg); font-weight: 700; font-size: 12px; display: grid; place-items: center; margin-top: 1px; }
+.warn .fix { margin-left: auto; flex: none; border: 1px solid currentColor; border-radius: 999px; background: transparent; color: inherit; font-size: 12px; padding: 2px 10px; font-weight: 600; }
+
+/* ---------------- sekmeler */
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+.tab { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+.tab .no { font-family: var(--font-mono); font-size: 12px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab[aria-selected="true"] .no { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 0 0 var(--r) var(--r); border-top: 0; padding: 18px 20px 22px; display: grid; gap: 18px; min-width: 0; }
+.panel h2 { font-size: 24px; }
+.panel .lead { margin: -10px 0 0; color: var(--muted); max-width: 70ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+input, select { font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; width: 100%; min-width: 0; }
+input[type=number] { text-align: right; }
+input:focus, select:focus { border-color: var(--sea); outline: none; }
+.out { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.out div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; }
+.out span { font-size: 12px; color: var(--muted); }
+.out b { font-family: var(--font-mono); font-weight: 500; font-size: 17px; }
+.formula { font-family: var(--font-mono); font-size: 13px; color: var(--muted); background: var(--surface-2); border-left: 3px solid var(--sea); padding: 10px 12px; border-radius: 0 8px 8px 0; overflow-x: auto; white-space: pre; }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th { text-align: left; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td input { padding: 5px 7px; min-width: 76px; }
+td input.name { min-width: 190px; }
+td.n { text-align: right; padding-right: 10px; }
+tr.hit td { background: var(--sea-soft); }
+tr.bad td { background: var(--warn-bg); }
+tfoot td { font-weight: 600; background: var(--surface-2); }
+.del { border: 0; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 6px; }
+.del:hover { color: var(--accent); }
+.add { justify-self: start; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.chart { background: var(--surface-2); border-radius: 10px; padding: 8px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; font-weight: 600; font-size: 13px; color: var(--muted); }
+.seg button.on { background: var(--sea); color: var(--surface); }
+footer { color: var(--muted); font-size: 12px; text-align: center; }
+
+/* HUH! baloncuğu */
+.huh { position: fixed; pointer-events: none; z-index: 50; font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--accent);
+       text-shadow: 0 2px 0 var(--surface); transform: translate(-50%, -50%); animation: huh .7s ease-out forwards; }
+@keyframes huh { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6) rotate(-6deg); } 20% { opacity: 1; transform: translate(-50%, -70%) scale(1.15) rotate(3deg); } 100% { opacity: 0; transform: translate(-50%, -160%) scale(1) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) { .huh { animation-duration: .01s; } #pend, #hullg { animation: none !important; } }
+
+@media (max-width: 900px) {
+  .top { grid-template-columns: 1fr; }
+  .ship { min-height: 200px; }
+  .results { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .two { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi .v { font-size: 27px; }
+  .panel { padding: 14px; }
+}
+</style>
+
+<div class="wrap">
+  <section class="top">
+    <div class="intro">
+      <div class="eyebrow">Gemi Makineleri Mühendisliği · Meyil Deneyi</div>
+      <h1>Meyil testi <span>hesaplayıcı</span></h1>
+      <p>Draft okumaları, sarkaç sapmaları ve hidrostatik tablodan GM, KG, LCG, boş tekne ağırlığı, fribord ve DWT hesabı. Arda Tüfeker'in deney verileri yüklü; değer değiştirdikçe sonuçlar anında güncellenir.</p>
+      <div class="bar">
+        <button class="btn" id="b-reset" type="button">Örnek veriyi geri yükle</button>
+        <button class="btn" id="b-copy" type="button">Sonuçları kopyala</button>
+        <button class="btn on" id="b-sound" type="button" aria-pressed="true">HUH sesi: açık</button>
+      </div>
+    </div>
+    <div class="ship" aria-label="Gemi kesiti ve sarkaç">
+      <svg viewBox="0 0 300 230" role="img" aria-label="Meyil açısıyla yatan gemi kesiti">
+        <g id="hullg" style="transform-origin:150px 132px">
+          <path d="M70 70 L230 70 L226 130 Q220 168 150 172 Q80 168 74 130 Z" fill="var(--hull)" opacity=".92"/>
+          <rect x="70" y="64" width="160" height="8" rx="2" fill="var(--accent)"/>
+          <rect x="112" y="34" width="76" height="30" rx="3" fill="var(--hull)" opacity=".7"/>
+          <line x1="150" y1="78" x2="150" y2="165" stroke="var(--surface)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
+          <g id="pend" style="transform-origin:150px 80px">
+            <line x1="150" y1="80" x2="150" y2="148" stroke="var(--accent)" stroke-width="2"/>
+            <circle cx="150" cy="150" r="5" fill="var(--accent)"/>
+          </g>
+          <circle cx="150" cy="80" r="3" fill="var(--surface)"/>
+        </g>
+        <path d="M0 134 Q37 128 75 134 T150 134 T225 134 T300 134 L300 230 L0 230 Z" fill="var(--sea)" opacity=".55"/>
+      </svg>
+      <div class="cap">Ortalama meyil açısı <b id="cap-ang">—</b> · tan <b id="cap-tan">—</b></div>
+    </div>
+  </section>
+
+  <section class="results" id="results" aria-live="polite"></section>
+  <div class="minor" id="minor"></div>
+  <div class="warns" id="warns"></div>
+
+  <section>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="panel" id="panel"></div>
+  </section>
+
+  <footer>Formüller Arda Tüfeker (231503029) meyil testi Excel dosyasıyla aynıdır. Veriler yalnızca bu tarayıcıda saklanır.</footer>
+</div>
+
+<script>
+"use strict";
+// ======================================================================= örnek veri (Excel'den)
+const SAMPLE = {
+  dr: { kicP: 2.86, kicS: 2.87, ortP: 2.22, ortS: 2.32, basP: 1.57, basS: 1.59 },
+  La: 3.6, Lf: 0.6, L1: 73.8, rho: 1.0247, LBP: 78, LOA: 85.6, B: 14, D: 6.6,
+  hydroMode: "auto",
+  manual: { draft: 2.267, disp: 1599.36, mtc: 32.525, kmt: 8.0085, lcb: -0.439, lcf: 1.509, kb: 1.214, wet: 991.05 },
+  hydro: [
+    [2.1,1464.98,31.76,8.44,-0.616,1.477,1.129,963.6],[2.11,1473.09,31.81,8.411,-0.605,1.479,1.134,965.2],
+    [2.12,1481.2,31.86,8.383,-0.594,1.481,1.14,966.9],[2.13,1489.3,31.9,8.355,-0.583,1.482,1.145,968.6],
+    [2.14,1497.41,31.95,8.328,-0.572,1.484,1.15,970.2],[2.15,1505.52,31.99,8.3,-0.561,1.486,1.154,971.9],
+    [2.16,1513.67,32.04,8.273,-0.548,1.488,1.16,973.5],[2.17,1521.82,32.09,8.247,-0.537,1.49,1.165,975.2],
+    [2.18,1529.98,32.13,8.221,-0.527,1.492,1.17,976.9],[2.19,1538.14,32.18,8.195,-0.516,1.494,1.176,978.5],
+    [2.2,1546.29,32.23,8.169,-0.506,1.497,1.181,980.2],[2.21,1554.43,32.27,8.144,-0.495,1.499,1.186,981.9],
+    [2.22,1562.6,32.32,8.119,-0.485,1.501,1.191,983.5],[2.23,1570.76,32.37,8.094,-0.475,1.503,1.196,985.2],
+    [2.24,1578.92,32.41,8.069,-0.465,1.505,1.201,986.9],[2.25,1587.07,32.46,8.045,-0.455,1.507,1.206,988.5],
+    [2.26,1595.26,32.5,8.02,-0.444,1.508,1.211,990.2],[2.27,1603.46,32.55,7.997,-0.434,-1.51,1.217,991.9],
+    [2.28,1611.67,32.59,7.973,-0.424,1.512,1.222,993.5],[2.29,1619.87,32.64,7.95,-0.414,1.513,1.227,995.2],
+    [2.3,1628.07,32.68,7.927,-0.405,1.515,1.233,996.9],[2.31,1636.27,32.73,7.904,-0.395,1.517,1.238,998.5],
+    [2.32,1644.48,32.77,7.882,-0.386,1.519,1.243,1000.2],[2.33,1652.68,32.82,7.86,-0.377,1.521,1.248,1001.8],
+    [2.34,1660.88,32.86,7.838,-0.367,1.523,1.253,1003.5],[2.35,1669.09,32.91,7.816,-0.358,1.524,1.258,1005.2],
+    [2.36,1677.31,32.95,7.794,-0.348,1.524,1.263,1006.8],[2.37,1685.56,32.99,7.773,-0.339,1.525,1.269,1008.5],
+    [2.38,1693.81,33.04,7.752,-0.33,1.526,1.274,1010.1],[2.39,1702.06,33.09,7.731,-0.321,1.527,1.279,1011.8]
+  ],
+  weights: [ { id: "W1", w: 4.17 }, { id: "W2", w: 4.16 }, { id: "W3", w: 4.15 }, { id: "W4", w: 4.18 } ],
+  wpos: "POSTA 58 1/2", dist: 12,
+  moved: ["W3", "W4", "W1", "W2", "W3", "W4", "W2", "W1"],
+  pendB: 5618, pendK: 5885,
+  readB: [401.7, 344.6, 285.4, 343.5, 399.2, 454.7, 511.3, 455.5, 400.2],
+  readK: [593.2, 533.4, 473.3, 532.9, 592.6, 652.5, 712.4, 652.2, 593.1],
+  fs: [],
+  added: [
+    ["Hayat kurtarma ekipmanları",0.2,-27,9.6],["Yangın söndürme ekipmanları",2,-25.6,6],["Güverte ekipmanları",0.3,33.6,7.3],
+    ["Navigasyon ekipmanları",0.05,-25.2,15.2],["Branda ekipmanları",0.04,-1.5,8.1],["Ana makine parçaları",0.65,-33,5.1],
+    ["Jeneratör parçaları",0.15,-33,5.1],["Kazan parçaları",0.25,-33,5.1],["Elektrik ekipmanları",0.08,-25.2,15.3],
+    ["Acil durum odası (boya)",0.25,-27,4.4],["Üst güverte (boya)",0.85,6,6.5],["Pompa odası (boya)",0.1,-20.4,5.4],
+    ["Yaşam mahalli (boya)",0.07,-27,9.5],["Soğutma vs.",0.45,-28.2,8.5],["Hava tankı",0.8,-14.1,7.3],["CO2 boruları",0.1,-33,6.6],
+    ["Sky light",0.3,-23.4,9],["Yükleme bilgisayarı",0.04,-22.2,10.2],["Çekme halatı",0.357,36.6,7.9],["Zincir",2.144,1.8,7.2],
+    ["Fire wire",0.426,9,6.68],["Cargo hose",0.85,13.2,8.1],["Each board",0.035,-27,9.5]
+  ],
+  removed: [
+    ["Yer değiştiren ağırlıklar (W1–W4)",16.66,-3.9,7.3],["Ön yağ tablosu",0.025,21.6,1.4],["Arka yağ tablosu",0.025,-16.2,1.4],
+    ["İnsanlar (10 kişi)",0.75,-3.9,7.6],["Baş pik tankı (merkez)",71.479,37.243,3.837],["NO.1 balast tankı (merkez)",41.391,25.772,0.578],
+    ["NO.1 balast tankı (merkez)",64.066,17.602,0.577],["NO.1 balast tankı (merkez)",64.066,17.602,0.577],["Temiz su tankı (merkez)",79.545,32.852,2.788],
+    ["NO.5 balast tankı (iskele)",0.451,-14.252,0.03],["Dizel oil servis tankı (iskele)",0.76,-28.358,5.774],["Dizel oil yerleşim tankı (iskele)",0.76,-26.951,5.487],
+    ["Fuel oil servis tankı (iskele)",0.4,-24.262,4.622],["Bağlama halatı",0.65,1.8,8.5],["Elektronik kablo",0.75,-36,9.8],["Çalışma aletleri vs.",1,-27,8.3]
+  ],
+  tStr: 0.01, tKeel: 0.013, slwl: 5.641, dispSlwl: 4627.554
+};
+
+// ======================================================================= hesap (Excel ile aynı)
+function interp(table, T) {
+  const t = [...table].filter((r) => r.every(Number.isFinite)).sort((a, b) => a[0] - b[0]);
+  if (!t.length) return null;
+  let i = t.findIndex((r) => r[0] >= T);
+  if (i === -1) i = t.length - 1;
+  if (i === 0) i = 1;
+  const a = t[Math.max(0, i - 1)], b = t[Math.min(t.length - 1, i)];
+  const u = b[0] === a[0] ? 0 : (T - a[0]) / (b[0] - a[0]);
+  const v = a.map((x, k) => x + (b[k] - x) * u);
+  return { draft: T, disp: v[1], mtc: v[2], kmt: v[3], lcb: v[4], lcf: v[5], kb: v[6], wet: v[7], out: T < t[0][0] || T > t[t.length - 1][0], rows: [a[0], b[0]] };
+}
+
+function compute(s) {
+  const r = {};
+  const A = (s.dr.kicP + s.dr.kicS) / 2, M = (s.dr.ortP + s.dr.ortS) / 2, B = (s.dr.basP + s.dr.basS) / 2;
+  r.A = A; r.M = M; r.B = B;
+  r.dA = A + (A - B) * s.La / s.L1;
+  r.dF = B - (A - B) * s.Lf / s.L1;
+  r.Tm = (r.dA + 6 * M + r.dF) / 8;
+  r.trim = r.dA - r.dF;
+  r.trimDeg = Math.atan(r.trim / s.LBP) * 180 / Math.PI;
+  r.hydro = s.hydroMode === "auto" ? interp(s.hydro, r.Tm) : { ...s.manual };
+  r.delta = r.hydro.disp * s.rho / 1.025;
+  const wmap = Object.fromEntries(s.weights.map((w) => [w.id, w.w]));
+  r.steps = s.moved.map((id, k) => {
+    const w = wmap[id] ?? 0, mom = w * s.dist;
+    const dB = Math.abs(s.readB[k] - s.readB[k + 1]), dK = Math.abs(s.readK[k] - s.readK[k + 1]);
+    const tB = dB / s.pendB, tK = dK / s.pendK;
+    return { k: k + 1, id, w, mom, dB, dK, tB, tK, tan: (tB + tK) / 2 };
+  });
+  r.Mavg = r.steps.reduce((a, x) => a + x.mom, 0) / r.steps.length;
+  r.tanAvg = r.steps.reduce((a, x) => a + x.tan, 0) / r.steps.length;
+  r.heelDeg = Math.atan(r.tanAvg) * 180 / Math.PI;
+  r.G0M = r.Mavg / (r.delta * r.tanAvg);
+  r.FS = s.fs.reduce((a, x) => a + (x[1] || 0) * (x[2] || 0), 0);
+  r.GG0 = r.FS / r.delta;
+  r.GM = r.G0M + r.GG0;
+  r.KG = r.hydro.kmt - r.GM;
+  r.LCG = r.hydro.lcb + (r.KG - r.hydro.kb) * Math.sin(r.trimDeg * Math.PI / 180);
+  const sum = (list, k) => list.reduce((a, x) => a + (k === 1 ? x[1] : x[1] * x[k]), 0);
+  r.add = { w: sum(s.added, 1), l: sum(s.added, 2), v: sum(s.added, 3) };
+  r.rem = { w: sum(s.removed, 1), l: sum(s.removed, 2), v: sum(s.removed, 3) };
+  r.LS = r.delta + r.add.w - r.rem.w;
+  r.LSlcg = (r.delta * r.LCG + r.add.l - r.rem.l) / r.LS;
+  r.LSvcg = (r.delta * r.KG + r.add.v - r.rem.v) / r.LS;
+  r.depthStr = s.D + s.tStr;
+  r.Tsummer = s.slwl - s.tKeel;
+  r.fb = r.depthStr - r.Tsummer;
+  r.DWT = s.dispSlwl - r.LS;
+  return r;
+}
+
+// ======================================================================= durum
+const KEY = "meyil-arda-v1";
+const clone = (o) => JSON.parse(JSON.stringify(o));
+let S = clone(SAMPLE);
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(clone(SAMPLE), JSON.parse(raw)); } catch (e) { /* depolama yoksa örnek veriyle devam */ }
+let saveT = 0;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 300); }
+let tab = 0;
+try { tab = Number(localStorage.getItem(KEY + "-tab")) || 0; } catch (e) {}
+
+const f = (x, d = 3) => Number.isFinite(x) ? x.toLocaleString("tr-TR", { minimumFractionDigits: d, maximumFractionDigits: d }) : "—";
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = (s) => document.querySelector(s);
+
+// ======================================================================= üst kısım
+function renderTop(r) {
+  const k = (label, val, unit, d = 3, hero = false) =>
+    `<div class="kpi${hero ? " hero" : ""}"><div class="k">${label}</div><div class="v">${f(val, d)}<small>${unit}</small></div></div>`;
+  $("#results").innerHTML = k("GM", r.GM, "m", 3, true) + k("KG = VCG", r.KG, "m") + k("LCG", r.LCG, "m") +
+    k("Boş tekne", r.LS, "ton", 1) + k("DWT", r.DWT, "ton", 1) + k("Yaz fribordu", r.fb, "m");
+  $("#minor").innerHTML = [
+    ["Ortalama draft", f(r.Tm, 4) + " m"], ["Trim", f(r.trim, 3) + " m kıça"], ["Trim açısı", f(r.trimDeg, 3) + "°"],
+    ["Gerçek deplasman", f(r.delta, 2) + " t"], ["Meyil momenti", f(r.Mavg, 2) + " t·m"], ["G0M", f(r.G0M, 4) + " m"],
+    ["GG0", f(r.GG0, 4) + " m"], ["Boş tekne LCG / VCG", f(r.LSlcg, 3) + " / " + f(r.LSvcg, 3) + " m"],
+  ].map(([a, b]) => `<span>${a} <b>${b}</b></span>`).join("");
+  $("#cap-ang").textContent = f(r.heelDeg, 3) + "°";
+  $("#cap-tan").textContent = f(r.tanAvg, 5);
+  // gemi kesiti: gerçek açı çok küçük, görünür olsun diye 6 kat abartılır
+  const vis = Math.min(14, r.heelDeg * 6);
+  const hull = $("#hullg"), pend = $("#pend");
+  hull.style.animation = "none"; pend.style.animation = "none";
+  hull.style.transform = `rotate(${vis}deg)`; pend.style.transform = `rotate(${-vis}deg)`;
+  // uyarılar
+  const w = [];
+  if (S.hydroMode === "auto" && r.hydro?.out) w.push({ t: `Ortalama draft (${f(r.Tm, 4)} m) hidrostatik tablonun dışında; değerler uçtan doğrusal uzatıldı.` });
+  if (S.hydroMode === "manual" && Math.abs(S.manual.draft - r.Tm) > 0.002)
+    w.push({ t: `Elle girilen hidrostatik satır ${f(S.manual.draft, 3)} m draft içindir; hesaplanan ortalama draft ${f(r.Tm, 4)} m. Excel'deki satır eski trime (1,337 m) göre okunmuş.`, fix: "auto", label: "Tablodan otomatik oku" });
+  S.hydro.forEach((row, i) => { if (row[5] < 0 && S.hydro.filter((x) => x[5] > 0).length > S.hydro.length / 2) w.push({ t: `Hidrostatik tabloda ${f(row[0], 2)} m satırında LCF negatif (${f(row[5], 3)}); komşu satırlar pozitif, muhtemelen işaret hatası.`, fix: "lcf:" + i, label: "İşareti düzelt" }); });
+  const seen = {};
+  S.removed.forEach((x, i) => { const key = x[0] + "|" + x[1] + "|" + x[2]; if (seen[key] !== undefined) w.push({ t: `Çıkarılan ağırlıklarda "${x[0]}" (${f(x[1], 3)} t) iki kez var; çift sayılıyor olabilir.`, fix: "dup:" + i, label: "Tekrarı sil" }); else seen[key] = i; });
+  if (r.steps.some((x) => x.w === 0)) w.push({ t: "Bazı adımlarda kaydırılan ağırlık seçili değil." });
+  $("#warns").innerHTML = w.map((x) => `<div class="warn"><span>${esc(x.t)}</span>${x.fix ? `<button class="fix" type="button" data-fix="${x.fix}">${x.label}</button>` : ""}</div>`).join("");
+}
+
+// ======================================================================= sekmeler
+const TABS = ["Draftlar", "Hidrostatik", "Meyil deneyi", "Serbest yüzey", "Ağırlıklar", "Fribord ve DWT"];
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map((t, i) => `<button class="tab" role="tab" type="button" id="tab-${i}" aria-selected="${i === tab}" data-tab="${i}"><span class="no">${i + 1}</span>${t}</button>`).join("");
+}
+const num = (path, label, val, step = "any") => `<div class="field"><label for="in-${path}">${label}</label><input type="number" id="in-${path}" data-path="${path}" step="${step}" value="${val}"></div>`;
+const outs = (pairs) => `<div class="out">${pairs.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>`;
+
+function listTable(key, cols, r, totals) {
+  const rows = S[key].map((row, i) => `<tr${totals?.bad?.(row, i) ? ' class="bad"' : ""}>${cols.map((c, j) => c.calc
+      ? `<td class="n">${f(c.calc(row), c.d ?? 3)}</td>`
+      : `<td><input ${j === 0 ? 'class="name" type="text"' : 'type="number" step="any"'} id="${key}-${i}-${j}" data-list="${key}" data-i="${i}" data-j="${j}" value="${esc(row[j])}"></td>`).join("")}
+      <td><button class="del" type="button" data-del="${key}" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("");
+  return `<div class="tw"><table><thead><tr>${cols.map((c) => `<th>${c.h}</th>`).join("")}<th></th></tr></thead><tbody>${rows}</tbody>
+    ${totals ? `<tfoot><tr>${totals.cells.map((c) => `<td class="n">${c}</td>`).join("")}<td></td></tr></tfoot>` : ""}</table></div>
+    <button class="btn add" type="button" data-add="${key}">+ Satır ekle</button>`;
+}
+
+function chart(r) {
+  // sarkaç okumaları: adım adım zikzak
+  const W = 520, H = 190, pl = 46, pr = 12, pt = 14, pb = 30;
+  const all = [...S.readB, ...S.readK].filter(Number.isFinite);
+  const lo = Math.floor(Math.min(...all) / 50) * 50, hi = Math.ceil(Math.max(...all) / 50) * 50;
+  const x = (i) => pl + i * (W - pl - pr) / 8, y = (v) => pt + (hi - v) * (H - pt - pb) / (hi - lo || 1);
+  const line = (arr, col) => `<polyline fill="none" stroke="${col}" stroke-width="2.2" points="${arr.map((v, i) => `${x(i)},${y(v)}`).join(" ")}"/>` +
+    arr.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="3.2" fill="${col}"/>`).join("");
+  let grid = "";
+  for (let v = lo; v <= hi; v += 50) grid += `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="var(--muted)">${v}</text>`;
+  for (let i = 0; i <= 8; i++) grid += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle" font-size="10" fill="var(--muted)">${i}</text>`;
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Sarkaç okumaları">${grid}${line(S.readB, "var(--sea)")}${line(S.readK, "var(--accent)")}
+    <text x="${pl}" y="${pt - 3}" font-size="10" fill="var(--sea)">● Baş sarkacı</text><text x="${pl + 90}" y="${pt - 3}" font-size="10" fill="var(--accent)">● Kıç sarkacı</text>
+    <text x="${W - pr}" y="${H - 10}" text-anchor="end" font-size="10" fill="var(--muted)">adım</text></svg></div>`;
+}
+
+function renderPanel() {
+  const r = compute(S);
+  const p = $("#panel");
+  p.setAttribute("role", "tabpanel");
+  p.setAttribute("aria-labelledby", "tab-" + tab);
+  let h = "";
+  if (tab === 0) {
+    h = `<h2>Draft okumaları ve düzeltme</h2><p class="lead">İskele ve sancak draftları okunur, baş ve kıç draftları dikmelere taşınır. Ortalama draft 1-6-1 ağırlıkla bulunur.</p>
+      <div class="grid">${num("dr.kicP", "Kıç iskele (m)", S.dr.kicP)}${num("dr.kicS", "Kıç sancak (m)", S.dr.kicS)}${num("dr.ortP", "Orta iskele (m)", S.dr.ortP)}
+      ${num("dr.ortS", "Orta sancak (m)", S.dr.ortS)}${num("dr.basP", "Baş iskele (m)", S.dr.basP)}${num("dr.basS", "Baş sancak (m)", S.dr.basS)}</div>
+      <div class="grid">${num("La", "La: kıç işaret–kıç dikme (m)", S.La)}${num("Lf", "Lf: baş işaret–baş dikme (m)", S.Lf)}${num("L1", "L1: işaretler arası (m)", S.L1)}
+      ${num("LBP", "Kaimeler arası boy LBP (m)", S.LBP)}${num("rho", "Deniz suyu yoğunluğu (t/m³)", S.rho)}</div>
+      ${outs([["Kıç ortalama A", f(r.A, 3) + " m"], ["Orta ortalama", f(r.M, 3) + " m"], ["Baş ortalama B", f(r.B, 3) + " m"], ["Düzeltilmiş kıç dA", f(r.dA, 4) + " m"],
+        ["Düzeltilmiş baş dF", f(r.dF, 4) + " m"], ["Ortalama draft", f(r.Tm, 4) + " m"], ["Trim", f(r.trim, 4) + " m"], ["Trim açısı", f(r.trimDeg, 4) + "°"]])}
+      <div class="formula">dA = A + (A − B)·La / L1        dF = B − (A − B)·Lf / L1
+Tort = (dA + 6·Torta + dF) / 8      trim = dA − dF      θ = atan(trim / LBP)</div>`;
+  } else if (tab === 1) {
+    const hy = r.hydro, auto = S.hydroMode === "auto";
+    h = `<h2>Hidrostatik değerler</h2><p class="lead">Ortalama drafta karşılık gelen değerler tablodan doğrusal enterpolasyonla okunur. İstersen Excel'deki gibi elle de girebilirsin.</p>
+      <div class="seg" role="group" aria-label="Okuma yöntemi"><button type="button" data-mode="auto" class="${auto ? "on" : ""}">Tablodan otomatik</button><button type="button" data-mode="manual" class="${auto ? "" : "on"}">Elle gir</button></div>
+      ${auto ? "" : `<div class="grid">${[["draft", "Draft (m)"], ["disp", "Deplasman (t)"], ["mtc", "MTC (t·m/cm)"], ["kmt", "KMT (m)"], ["lcb", "LCB (m)"], ["lcf", "LCF (m)"], ["kb", "KB (m)"], ["wet", "Islak yüzey (m²)"]]
+        .map(([k, l]) => num("manual." + k, l, S.manual[k])).join("")}</div>`}
+      ${outs([["Okunan draft", f(hy.draft, 4) + " m"], ["Tablo deplasmanı", f(hy.disp, 2) + " t"], ["Gerçek deplasman", f(r.delta, 2) + " t"], ["KMT", f(hy.kmt, 4) + " m"],
+        ["LCB", f(hy.lcb, 4) + " m"], ["KB", f(hy.kb, 4) + " m"], ["MTC", f(hy.mtc, 3)], ["LCF", f(hy.lcf, 3) + " m"]])}
+      <div class="formula">Δgerçek = Δtablo × ρ / 1,025${auto && hy.rows ? `        (enterpolasyon: ${f(hy.rows[0], 2)} – ${f(hy.rows[1], 2)} m satırları)` : ""}</div>
+      <div class="tw"><table><thead><tr><th>Draft</th><th>Deplasman</th><th>MTC</th><th>KMT</th><th>LCB</th><th>LCF</th><th>KB</th><th>Islak yüzey</th><th></th></tr></thead><tbody>
+      ${S.hydro.map((row, i) => `<tr class="${auto && hy.rows && (row[0] === hy.rows[0] || row[0] === hy.rows[1]) ? "hit" : ""}${row[5] < 0 ? " bad" : ""}">${row.map((v, j) => `<td><input type="number" step="any" id="hydro-${i}-${j}" data-list="hydro" data-i="${i}" data-j="${j}" value="${v}"></td>`).join("")}<td><button class="del" type="button" data-del="hydro" data-i="${i}" aria-label="Satırı sil">×</button></td></tr>`).join("")}
+      </tbody></table></div><button class="btn add" type="button" data-add="hydro">+ Satır ekle</button>`;
+  } else if (tab === 2) {
+    const opts = (sel) => S.weights.map((w) => `<option${w.id === sel ? " selected" : ""}>${esc(w.id)}</option>`).join("");
+    h = `<h2>Meyil deneyi</h2><p class="lead">Dört ağırlık ${esc(S.wpos)}'de iskele–sancak arasında 8 adımda kaydırılır. Her adımda baş ve kıç sarkaçlarının sapması okunur.</p>
+      <div class="grid">${S.weights.map((w, i) => num(`weights.${i}.w`, `${esc(w.id)} ağırlığı (ton)`, w.w)).join("")}${num("dist", "Kaydırma mesafesi (m)", S.dist)}
+      ${num("pendB", "Baş sarkaç boyu (mm)", S.pendB)}${num("pendK", "Kıç sarkaç boyu (mm)", S.pendK)}</div>
+      <div class="two"><div class="tw"><table><thead><tr><th>Adım</th><th>Kayan</th><th>Moment t·m</th><th>Baş okuma</th><th>Sapma</th><th>Kıç okuma</th><th>Sapma</th><th>Ort. tan</th></tr></thead><tbody>
+      <tr><td class="n">0</td><td>—</td><td class="n">—</td><td><input type="number" step="any" id="rb-0" data-read="readB" data-i="0" value="${S.readB[0]}"></td><td class="n">—</td><td><input type="number" step="any" id="rk-0" data-read="readK" data-i="0" value="${S.readK[0]}"></td><td class="n">—</td><td class="n">—</td></tr>
+      ${r.steps.map((x, i) => `<tr><td class="n">${x.k}</td><td><select id="mv-${i}" data-moved="${i}" aria-label="${x.k}. adımda kaydırılan ağırlık">${opts(x.id)}</select></td><td class="n">${f(x.mom, 2)}</td>
+        <td><input type="number" step="any" id="rb-${i + 1}" data-read="readB" data-i="${i + 1}" value="${S.readB[i + 1]}"></td><td class="n">${f(x.dB, 1)}</td>
+        <td><input type="number" step="any" id="rk-${i + 1}" data-read="readK" data-i="${i + 1}" value="${S.readK[i + 1]}"></td><td class="n">${f(x.dK, 1)}</td><td class="n">${f(x.tan, 5)}</td></tr>`).join("")}
+      </tbody><tfoot><tr><td>Ort.</td><td></td><td class="n">${f(r.Mavg, 2)}</td><td></td><td></td><td></td><td></td><td class="n">${f(r.tanAvg, 5)}</td></tr></tfoot></table></div>
+      ${chart(r)}</div>
+      ${outs([["Ortalama meyil momenti", f(r.Mavg, 3) + " t·m"], ["Ortalama tanjant", f(r.tanAvg, 6)], ["Meyil açısı", f(r.heelDeg, 4) + "°"], ["G0M", f(r.G0M, 4) + " m"]])}
+      <div class="formula">tan = sapma / sarkaç boyu   (baş ve kıç ortalaması)
+G0M = M_ort / (Δ × tan_ort)</div>`;
+  } else if (tab === 3) {
+    h = `<h2>Serbest yüzey etkisi</h2><p class="lead">Deney sırasında içinde serbest sıvı yüzeyi kalan tank varsa yoğunluk ve atalet momentiyle ekle. Excel'de bu tablo boş bırakılmış.</p>
+      ${listTable("fs", [{ h: "Tank" }, { h: "Yoğunluk t/m³" }, { h: "Atalet momenti m⁴" }, { h: "Etki t·m", calc: (x) => (x[1] || 0) * (x[2] || 0) }], r,
+        { cells: ["Toplam", "", "", f(r.FS, 3)] })}
+      ${outs([["Toplam serbest yüzey momenti", f(r.FS, 3) + " t·m"], ["GG0", f(r.GG0, 4) + " m"], ["GM = G0M + GG0", f(r.GM, 4) + " m"], ["KG = KMT − GM", f(r.KG, 4) + " m"]])}
+      <div class="formula">GG0 = Σ(ρ·i) / Δ        GM = G0M + GG0        KG = KMT − GM
+LCG = LCB + (KG − KB) · sin θ</div>`;
+  } else if (tab === 4) {
+    const cols = [{ h: "Parça" }, { h: "Ağırlık t" }, { h: "LCG m" }, { h: "VCG m" }, { h: "LCG mom.", calc: (x) => x[1] * x[2], d: 2 }, { h: "VCG mom.", calc: (x) => x[1] * x[3], d: 2 }];
+    h = `<h2>Boş tekne düzeltmesi</h2><p class="lead">Deney durumundaki gemiye eksik donanım eklenir; tanklar, insanlar ve deney ağırlıkları çıkarılır.</p>
+      ${outs([["Deney durumu", f(r.delta, 3) + " t"], ["LCG / VCG", f(r.LCG, 3) + " / " + f(r.KG, 3) + " m"], ["Eklenen", "+" + f(r.add.w, 3) + " t"], ["Çıkarılan", "−" + f(r.rem.w, 3) + " t"],
+        ["Boş tekne ağırlığı", f(r.LS, 3) + " t"], ["Boş tekne LCG", f(r.LSlcg, 4) + " m"], ["Boş tekne VCG", f(r.LSvcg, 4) + " m"]])}
+      <h3>Eklenen ağırlıklar</h3>${listTable("added", cols, r, { cells: ["Toplam", f(r.add.w, 3), "", "", f(r.add.l, 2), f(r.add.v, 2)] })}
+      <h3>Çıkarılan ağırlıklar</h3>${listTable("removed", cols, r, { cells: ["Toplam", f(r.rem.w, 3), "", "", f(r.rem.l, 2), f(r.rem.v, 2)],
+        bad: (row, i) => S.removed.findIndex((x) => x[0] === row[0] && x[1] === row[1] && x[2] === row[2]) !== i })}
+      <div class="formula">W_boş = Δ + ΣW_eklenen − ΣW_çıkarılan
+LCG_boş = (Δ·LCG + ΣM_ekl − ΣM_çık) / W_boş        VCG_boş = (Δ·KG + ΣM_ekl − ΣM_çık) / W_boş</div>`;
+  } else {
+    h = `<h2>Fribord ve deadweight</h2><p class="lead">Yaz yükleme hattında fribord ve taşıma kapasitesi.</p>
+      <div class="grid">${num("D", "Kalıp derinliği (m)", S.D)}${num("tStr", "Stringer sacı kalınlığı (m)", S.tStr)}${num("slwl", "S.L.W.L. draftı, ext. (m)", S.slwl)}
+      ${num("tKeel", "Omurga sacı kalınlığı (m)", S.tKeel)}${num("dispSlwl", "S.L.W.L.'de deplasman (t)", S.dispSlwl)}</div>
+      ${outs([["Stringer'a kadar derinlik", f(r.depthStr, 3) + " m"], ["Yaz kalıp draftı", f(r.Tsummer, 3) + " m"], ["Yaz fribordu", f(r.fb, 3) + " m"], ["Boş tekne", f(r.LS, 3) + " t"], ["DWT", f(r.DWT, 3) + " t"]])}
+      <div class="formula">Fribord = (D + t_stringer) − (T_yaz,ext − t_omurga)
+DWT = Δ_SLWL − W_boş</div>`;
+  }
+  p.innerHTML = h;
+}
+
+function renderAll(keepFocus) {
+  const a = document.activeElement, id = a && a.id, pos = a && a.selectionStart;
+  const r = compute(S);
+  renderTop(r);
+  renderTabs();
+  renderPanel();
+  if (keepFocus && id) { const e = document.getElementById(id); if (e) { e.focus(); try { if (pos != null) e.setSelectionRange(pos, pos); } catch (er) {} } }
+}
+
+// ======================================================================= etkileşim
+function setPath(path, v) {
+  const parts = path.split(".");
+  let o = S;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = v;
+}
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  const v = t.type === "number" ? parseFloat(String(t.value).replace(",", ".")) : t.value;
+  if (t.type === "number" && !Number.isFinite(v)) return;   // yazarken geçici boşluk
+  if (t.dataset.path) setPath(t.dataset.path, v);
+  else if (t.dataset.read) S[t.dataset.read][+t.dataset.i] = v;
+  else if (t.dataset.list) S[t.dataset.list][+t.dataset.i][+t.dataset.j] = v;
+  else return;
+  save();
+  renderAll(true);
+});
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.dataset.moved) { S.moved[+t.dataset.moved] = t.value; save(); renderAll(); }
+});
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.tab) { tab = +t.dataset.tab; try { localStorage.setItem(KEY + "-tab", tab); } catch (er) {} renderTabs(); renderPanel(); return; }
+  if (t.dataset.mode) { S.hydroMode = t.dataset.mode; save(); renderAll(); return; }
+  if (t.dataset.add) {
+    const key = t.dataset.add;
+    S[key].push(key === "hydro" ? [0, 0, 0, 0, 0, 0, 0, 0] : key === "fs" ? ["Yeni tank", 1.025, 0] : ["Yeni parça", 0, 0, 0]);
+    save(); renderAll(); return;
+  }
+  if (t.dataset.del) { S[t.dataset.del].splice(+t.dataset.i, 1); save(); renderAll(); return; }
+  if (t.dataset.fix) {
+    const fx = t.dataset.fix;
+    if (fx === "auto") S.hydroMode = "auto";
+    else if (fx.startsWith("lcf:")) { const i = +fx.slice(4); S.hydro[i][5] = Math.abs(S.hydro[i][5]); }
+    else if (fx.startsWith("dup:")) S.removed.splice(+fx.slice(4), 1);
+    save(); renderAll(); return;
+  }
+  if (t.id === "b-reset") { S = clone(SAMPLE); save(); renderAll(); return; }
+  if (t.id === "b-sound") { sound = !sound; t.classList.toggle("on", sound); t.setAttribute("aria-pressed", sound); t.textContent = "HUH sesi: " + (sound ? "açık" : "kapalı"); try { localStorage.setItem(KEY + "-snd", sound ? "1" : "0"); } catch (er) {} return; }
+  if (t.id === "b-copy") {
+    const r = compute(S);
+    const txt = [`Meyil testi sonuçları (Arda Tüfeker)`, `Ortalama draft: ${f(r.Tm, 4)} m`, `Trim: ${f(r.trim, 4)} m (${f(r.trimDeg, 4)}°)`,
+      `Gerçek deplasman: ${f(r.delta, 3)} t`, `Ortalama meyil momenti: ${f(r.Mavg, 3)} t·m`, `Ortalama tanjant: ${f(r.tanAvg, 6)}`,
+      `G0M: ${f(r.G0M, 4)} m`, `GG0: ${f(r.GG0, 4)} m`, `GM: ${f(r.GM, 4)} m`, `KG: ${f(r.KG, 4)} m`, `LCG: ${f(r.LCG, 4)} m`,
+      `Boş tekne: ${f(r.LS, 3)} t, LCG ${f(r.LSlcg, 4)} m, VCG ${f(r.LSvcg, 4)} m`, `Yaz fribordu: ${f(r.fb, 3)} m`, `DWT: ${f(r.DWT, 3)} t`].join("\n");
+    try { await navigator.clipboard.writeText(txt); t.textContent = "Kopyalandı"; }
+    catch (er) { t.textContent = "Kopyalanamadı"; }
+    setTimeout(() => (t.textContent = "Sonuçları kopyala"), 1600);
+  }
+});
+
+// ======================================================================= HUH! (her tıklamada nefes sesi)
+let sound = true;
+try { sound = localStorage.getItem(KEY + "-snd") !== "0"; } catch (e) {}
+let ac = null;
+function huh() {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === "suspended") ac.resume();
+    const t0 = ac.currentTime, dur = 0.34, jit = 0.92 + Math.random() * 0.16;
+    // nefes: bant geçiren gürültü, "a/ʌ" formantları
+    const n = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const out = ac.createGain();
+    out.gain.setValueAtTime(0.0001, t0);
+    out.gain.exponentialRampToValueAtTime(0.9, t0 + 0.02);
+    out.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    out.connect(ac.destination);
+    [[680 * jit, 1.4, 0.9], [1220 * jit, 2.2, 0.55], [2600, 3, 0.18]].forEach(([fr, q, g]) => {
+      const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = fr; bp.Q.value = q;
+      const gg = ac.createGain(); gg.gain.value = g;
+      src.connect(bp); bp.connect(gg); gg.connect(out);
+    });
+    // ses telleri: hafif, alçalan "h-uh"
+    const osc = ac.createOscillator(); osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(150 * jit, t0); osc.frequency.exponentialRampToValueAtTime(105 * jit, t0 + dur);
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1100;
+    const vg = ac.createGain(); vg.gain.setValueAtTime(0.0001, t0); vg.gain.exponentialRampToValueAtTime(0.16, t0 + 0.05); vg.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.85);
+    osc.connect(lp); lp.connect(vg); vg.connect(out);
+    src.start(t0); osc.start(t0); src.stop(t0 + dur); osc.stop(t0 + dur);
+  } catch (e) { /* ses açılamazsa sessiz devam */ }
+}
+document.addEventListener("pointerdown", (e) => {
+  const isToggle = e.target.closest && e.target.closest("#b-sound");
+  if (!sound && !isToggle) return;
+  if (sound) huh();
+  const b = document.createElement("div");
+  b.className = "huh"; b.textContent = "HUH!";
+  b.style.left = e.clientX + "px"; b.style.top = e.clientY + "px";
+  if (sound) { document.body.appendChild(b); setTimeout(() => b.remove(), 750); }
+}, true);
+(() => { const b = $("#b-sound"); b.classList.toggle("on", sound); b.setAttribute("aria-pressed", sound); b.textContent = "HUH sesi: " + (sound ? "açık" : "kapalı"); })();
+
+window.__compute = compute; window.__SAMPLE = SAMPLE;
+renderAll();
+</script>
