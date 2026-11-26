@@ -1,0 +1,14 @@
+{
+  // Muscles4Chicks — Kerman, Buğra ve Arda'nın salon defteri
+  "name": "muscles4chicks",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-06-01",
+  "build": { "command": "node scripts/embed.mjs" },
+  "durable_objects": { "bindings": [{ "name": "GYM", "class_name": "Gym" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Gym"] }],
+  "vars": { "PLAYERS": "Kerman,Buğra,Arda" },
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true }
+  // Gizli değer (wrangler secret put GROUP_KEY): davet anahtarı
+}

@@ -1,0 +1,7 @@
+{
+  "name": "muscles4chicks",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "wrangler dev", "deploy": "wrangler deploy", "test": "node test/api.test.mjs" },
+  "devDependencies": { "wrangler": "^4" }
+}
