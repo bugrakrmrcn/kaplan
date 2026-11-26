@@ -1,0 +1,541 @@
+<title>Neon Salon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monoton&family=Audiowide&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap">
+<style>
+/* Düzen: telefon öncelikli tek sütun; üstte neon tabela, ortada sekme içeriği, altta sabit 3'lü menü.
+   Tek tema: 80'ler Miami gecesi (gün batımı + synthwave ızgara), bilerek koyu. */
+:root {
+  --night: #140b2b;        /* gece moru zemin */
+  --night-2: #21124a;      /* kart zemini */
+  --night-3: #2c1863;      /* basılı/aktif zemin */
+  --pink: #ff4fa8;         /* neon pembe */
+  --aqua: #22e6d4;         /* turkuaz */
+  --sun: #ffb24a;          /* gün batımı turuncusu */
+  --ink: #fbf2ff;
+  --muted: #b3a3d6;
+  --line: rgba(255, 255, 255, .13);
+  --gold: #ffd76a; --silver: #d9e1f2; --bronze: #ff9f6b;
+  --f-neon: "Monoton", "Audiowide", system-ui, sans-serif;
+  --f-head: "Audiowide", "Barlow Condensed", system-ui, sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--night); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px calc(96px + env(safe-area-inset-bottom, 0px));
+  -webkit-text-size-adjust: 100%; overflow-x: hidden;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; border: 0; background: none; }
+:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+
+/* --------- sahne: gün batımı, palmiyeler, ızgara (sabit arka plan) */
+.scene { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: linear-gradient(180deg, #120a26 0%, #2a1158 38%, #6a1f78 58%, #ff5f8f 74%, #ffb24a 86%, #140b2b 86.2%); }
+.scene .sun { position: absolute; left: 50%; top: 58%; width: min(70vw, 420px); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
+  background: repeating-linear-gradient(180deg, #ffd36b 0 16px, #ff6a9a 16px 18px), linear-gradient(#ffd36b, #ff4fa8);
+  -webkit-mask: linear-gradient(180deg, #000 55%, transparent 56%, #000 60%, transparent 62%, #000 66%, transparent 69%, #000 73%, transparent 77%);
+          mask: linear-gradient(180deg, #000 55%, transparent 56%, #000 60%, transparent 62%, #000 66%, transparent 69%, #000 73%, transparent 77%);
+  opacity: .55; filter: blur(.3px); }
+.scene .grid { position: absolute; left: -50%; right: -50%; top: 86%; bottom: -40%; transform: perspective(300px) rotateX(62deg); transform-origin: top;
+  background: linear-gradient(transparent 0 calc(100% - 2px), rgba(34, 230, 212, .45) 0) 0 0 / 100% 40px, linear-gradient(90deg, transparent 0 calc(100% - 2px), rgba(255, 79, 168, .45) 0) 0 0 / 60px 100%;
+  animation: drive 3s linear infinite; }
+@keyframes drive { to { background-position: 0 40px, 0 0; } }
+.scene svg { position: absolute; bottom: 13.5%; width: 46vw; max-width: 300px; fill: #0b0618; opacity: .9; }
+.scene .p1 { left: -4vw; } .scene .p2 { right: -6vw; transform: scaleX(-1); width: 38vw; }
+.scene::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20, 11, 43, .55), rgba(20, 11, 43, .2) 40%, rgba(20, 11, 43, .75)); }
+
+.app { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+
+/* --------- başlık */
+header { display: flex; align-items: center; gap: 12px; }
+.logo { font-family: var(--f-neon); font-size: clamp(30px, 9vw, 44px); line-height: 1; color: var(--pink); letter-spacing: 1px;
+  text-shadow: 0 0 6px var(--pink), 0 0 18px rgba(255, 79, 168, .8), 0 0 40px rgba(255, 79, 168, .5); }
+.logo small { display: block; font-family: var(--f-head); font-size: 12px; letter-spacing: 6px; color: var(--aqua); text-shadow: 0 0 8px var(--aqua); margin-top: 6px; }
+header .logo { font-size: clamp(22px, 7vw, 34px); white-space: nowrap; }
+header .logo small { font-size: 10px; letter-spacing: 2.5px; white-space: nowrap; }
+.me-chip { margin-left: auto; flex: none; display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; border-radius: 999px; background: rgba(33, 18, 74, .75); border: 1px solid var(--line); font-weight: 700; }
+
+/* --------- avatar */
+.av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-head); font-size: 15px; color: var(--night); flex: none; }
+.av.k { background: linear-gradient(135deg, var(--aqua), #5af7a8); }
+.av.b { background: linear-gradient(135deg, var(--pink), #ff8ad1); }
+.av.a { background: linear-gradient(135deg, var(--sun), #ffe27a); }
+.av.lg { width: 64px; height: 64px; font-size: 26px; }
+
+/* --------- giriş */
+.login { display: grid; gap: 14px; padding-top: 6vh; }
+.login h1 { font-family: var(--f-head); font-weight: 400; font-size: 22px; margin: 0; text-align: center; }
+.login p { margin: 0; text-align: center; color: var(--muted); }
+.who { display: grid; gap: 12px; }
+.who button { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 20px; background: rgba(33, 18, 74, .82);
+  border: 1px solid var(--line); text-align: left; transition: transform .12s, border-color .2s, box-shadow .2s; backdrop-filter: blur(6px); }
+.who button:hover, .who button:active { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink), 0 0 24px rgba(255, 79, 168, .35); transform: translateY(-2px); }
+.who .nm { font-family: var(--f-head); font-size: 24px; }
+.who .st { color: var(--muted); font-size: 14px; }
+.who .go { margin-left: auto; font-family: var(--f-head); color: var(--aqua); font-size: 22px; }
+
+/* --------- kartlar */
+.card { background: rgba(33, 18, 74, .84); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 14px; backdrop-filter: blur(8px); min-width: 0; }
+.label { font-family: var(--f-head); font-size: 12px; letter-spacing: 2px; color: var(--aqua); text-transform: uppercase; }
+h2 { font-family: var(--f-head); font-weight: 400; font-size: 20px; margin: 0; }
+.muted { color: var(--muted); }
+
+/* hareket seçimi */
+.ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.ex { padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); font-weight: 700; text-align: left; font-size: 15px; line-height: 1.15; min-height: 48px; }
+.ex.on { background: linear-gradient(135deg, rgba(255, 79, 168, .35), rgba(34, 230, 212, .2)); border-color: var(--pink); box-shadow: 0 0 16px rgba(255, 79, 168, .35); }
+.ex.add { color: var(--aqua); border-style: dashed; }
+.addrow { display: flex; gap: 8px; }
+.addrow input { flex: 1; min-width: 0; }
+input[type=text], input[type=number], select { background: rgba(0, 0, 0, .3); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; font-size: 16px; width: 100%; }
+
+/* ağırlık */
+.weight { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+.wnum { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.wnum input { font-family: var(--f-num); font-weight: 800; font-size: 64px; line-height: 1; text-align: center; width: 100%; max-width: 220px; padding: 0; border: 0; background: none;
+  color: var(--ink); text-shadow: 0 0 22px rgba(255, 79, 168, .6); font-variant-numeric: tabular-nums; }
+.wnum span { font-family: var(--f-head); color: var(--pink); font-size: 18px; }
+.steps { display: grid; gap: 6px; }
+.st-btn { width: 64px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, .07); border: 1px solid var(--line); font-family: var(--f-num); font-weight: 800; font-size: 19px; }
+.st-btn:active { background: var(--night-3); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mini { display: grid; gap: 6px; background: rgba(0, 0, 0, .22); border-radius: 16px; padding: 10px; }
+.mini .row { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+.mini .row b { text-align: center; font-family: var(--f-num); font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mini button { height: 44px; border-radius: 12px; background: rgba(255, 255, 255, .07); font-size: 22px; font-weight: 700; }
+.hint { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.hint b { color: var(--ink); }
+.save { height: 62px; border-radius: 18px; font-family: var(--f-head); font-size: 22px; letter-spacing: 3px; color: var(--night);
+  background: linear-gradient(90deg, var(--pink), var(--sun)); box-shadow: 0 8px 30px rgba(255, 79, 168, .45); transition: transform .1s, filter .2s; }
+.save:active { transform: scale(.98); filter: brightness(1.1); }
+.save[disabled] { opacity: .5; }
+
+/* sıralama */
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: rgba(0, 0, 0, .28); border-radius: 14px; padding: 4px; gap: 4px; }
+.seg button { padding: 9px; border-radius: 10px; font-weight: 700; color: var(--muted); font-size: 14px; }
+.seg button.on { background: var(--night-3); color: var(--ink); box-shadow: inset 0 0 0 1px var(--aqua); }
+.podium { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 8px; padding-top: 8px; }
+.pod { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
+.pod .nm { font-weight: 700; font-size: 15px; }
+.pod .val { font-family: var(--f-num); font-weight: 800; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.pod .val small { font-size: 13px; color: var(--muted); font-weight: 600; }
+.pod .sub { font-size: 12px; color: var(--muted); }
+.block { width: 100%; border-radius: 14px 14px 6px 6px; display: grid; place-items: start center; padding-top: 8px; font-family: var(--f-head); font-size: 22px; color: var(--night); }
+.p1 .block { height: 108px; background: linear-gradient(180deg, var(--gold), #f0a93a); box-shadow: 0 0 26px rgba(255, 215, 106, .45); }
+.p2 .block { height: 80px; background: linear-gradient(180deg, var(--silver), #9aa8c7); }
+.p3 .block { height: 58px; background: linear-gradient(180deg, var(--bronze), #c8673e); }
+.pod.empty .block { background: rgba(255, 255, 255, .06); color: var(--muted); box-shadow: none; }
+.rank-list { display: grid; gap: 6px; }
+.rrow { display: grid; grid-template-columns: 22px 34px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: rgba(0, 0, 0, .2); }
+.rrow .pos { font-family: var(--f-head); color: var(--muted); }
+.rrow .v { font-family: var(--f-num); font-weight: 800; font-size: 22px; font-variant-numeric: tabular-nums; }
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; }
+.bar .track { height: 30px; border-radius: 10px; background: rgba(0, 0, 0, .25); position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 10px; }
+.bar .t { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 13px; font-weight: 700; }
+
+/* geçmiş */
+.day { font-family: var(--f-head); font-size: 13px; letter-spacing: 1.5px; color: var(--sun); margin-top: 4px; }
+.feed { display: grid; gap: 8px; }
+.item { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 16px; background: rgba(0, 0, 0, .22); min-width: 0; }
+.item .t { min-width: 0; }
+.item .t b { font-weight: 700; }
+.item .t div { font-size: 13px; color: var(--muted); }
+.item .kg { font-family: var(--f-num); font-weight: 800; font-size: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+.pr { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 2px 7px; border-radius: 999px; background: var(--pink); color: var(--night); margin-left: 6px; vertical-align: 2px; }
+.del { font-size: 12px; color: var(--muted); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); margin-top: 4px; }
+.del.sure { color: var(--night); background: var(--pink); border-color: var(--pink); }
+.spark { width: 100%; height: auto; display: block; }
+.empty { text-align: center; padding: 22px 10px; color: var(--muted); display: grid; gap: 6px; }
+.empty b { color: var(--ink); font-family: var(--f-head); font-weight: 400; font-size: 17px; }
+.note { font-size: 13px; color: var(--sun); text-align: center; }
+
+/* alt menü */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center;
+  padding: 8px max(16px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(180deg, rgba(20, 11, 43, 0), rgba(20, 11, 43, .96) 30%); }
+nav.tabs .in { max-width: 560px; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: rgba(33, 18, 74, .95);
+  border: 1px solid var(--line); border-radius: 20px; padding: 6px; }
+nav.tabs button { padding: 9px 4px; border-radius: 14px; font-family: var(--f-head); font-size: 13px; letter-spacing: 1px; color: var(--muted); display: grid; justify-items: center; gap: 3px; }
+nav.tabs button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+nav.tabs button.on { color: var(--ink); background: linear-gradient(135deg, rgba(255, 79, 168, .4), rgba(34, 230, 212, .25)); }
+
+/* kutlama */
+.toast { position: fixed; left: 50%; top: calc(18px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 40; padding: 12px 20px; border-radius: 16px;
+  background: var(--night-2); border: 1px solid var(--aqua); box-shadow: 0 0 24px rgba(34, 230, 212, .4); font-weight: 700; text-align: center; max-width: calc(100vw - 32px); animation: pop .25s ease-out; }
+.celebrate { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: none; }
+.celebrate div { font-family: var(--f-neon); font-size: clamp(34px, 11vw, 64px); color: var(--sun); text-align: center; line-height: 1.1;
+  text-shadow: 0 0 10px var(--sun), 0 0 30px var(--pink), 0 0 60px var(--pink); animation: zoom 1.8s ease-out forwards; }
+@keyframes zoom { 0% { transform: scale(.4); opacity: 0; } 15% { transform: scale(1.12); opacity: 1; } 75% { opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes pop { from { transform: translate(-50%, -12px); opacity: 0; } }
+canvas#fx { position: fixed; inset: 0; z-index: 29; pointer-events: none; width: 100%; height: 100%; }
+@media (prefers-reduced-motion: reduce) { .scene .grid { animation: none; } .celebrate div, .toast { animation-duration: .01s; } }
+@media (min-width: 700px) { .login { padding-top: 10vh; } }
+</style>
+
+<div class="scene" aria-hidden="true">
+  <div class="sun"></div><div class="grid"></div>
+  <svg class="p1" viewBox="0 0 200 260"><path d="M96 260 C98 200 104 150 112 96 L118 96 C112 150 108 200 106 260 Z"/><path d="M114 96 C90 70 50 64 14 78 C48 66 84 74 108 92 C84 60 52 40 22 40 C58 36 92 56 114 88 C110 52 96 26 74 10 C104 22 120 52 120 86 C132 50 158 32 192 30 C160 42 136 64 124 92 C150 74 182 72 200 88 C176 80 144 84 120 100 Z"/></svg>
+  <svg class="p2" viewBox="0 0 200 260"><path d="M96 260 C98 200 104 150 112 96 L118 96 C112 150 108 200 106 260 Z"/><path d="M114 96 C90 70 50 64 14 78 C48 66 84 74 108 92 C84 60 52 40 22 40 C58 36 92 56 114 88 C110 52 96 26 74 10 C104 22 120 52 120 86 C132 50 158 32 192 30 C160 42 136 64 124 92 C150 74 182 72 200 88 C176 80 144 84 120 100 Z"/></svg>
+</div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<main class="app" id="app"></main>
+<nav class="tabs" id="tabs" hidden></nav>
+<div id="toast" aria-live="polite"></div>
+<div id="cele" class="celebrate" aria-live="polite"></div>
+
+<script>
+"use strict";
+// ======================================================================= sabitler
+const PEOPLE = [
+  { id: "Kerman", cls: "k" },
+  { id: "Buğra", cls: "b" },
+  { id: "Arda", cls: "a" },
+];
+const BASE_EX = ["Bench Press", "Squat", "Deadlift", "Overhead Press", "Incline Bench", "Barbell Row", "Lat Pulldown",
+  "Leg Press", "Biceps Curl", "Triceps Pushdown", "Dambıl Omuz Press", "Hip Thrust"];
+const BIG3 = ["Bench Press", "Squat", "Deadlift"];
+const KEY = "neon-salon-v1";
+
+// ======================================================================= durum
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(KEY + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(KEY + k, JSON.stringify(v)); } catch (e) {} },
+};
+let me = LS.get("me", "");
+let view = LS.get("view", "kaydet");
+let lifts = [];               // {id, who, ex, kg, reps, sets, at}
+let customEx = [];
+let dbState = "loading";      // loading | live | slow | local | error
+let db = null;
+const form = LS.get("form", { ex: "Bench Press", kg: 60, reps: 8, sets: 3 });
+let rankEx = LS.get("rankEx", "Bench Press");
+let rankMode = LS.get("rankMode", "kg");     // kg | 1rm
+let histEx = LS.get("histEx", "");
+let addingEx = false;
+let delAsk = "";
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n, d = 1) => Number.isFinite(n) ? (Math.round(n * 10 ** d) / 10 ** d).toLocaleString("tr-TR") : "—";
+const person = (id) => PEOPLE.find((p) => p.id === id) || { id, cls: "k" };
+const av = (id, cls = "") => `<span class="av ${person(id).cls} ${cls}">${esc(String(id).slice(0, 1))}</span>`;
+const exList = () => [...BASE_EX, ...customEx.filter((x) => !BASE_EX.includes(x))];
+const e1rm = (kg, reps) => reps <= 1 ? kg : kg * (1 + reps / 30);    // Epley
+const score = (l, mode) => mode === "1rm" ? e1rm(l.kg, l.reps) : l.kg + l.reps / 1000;   // eşit kg'de tekrar sayısı öne geçirir
+
+// ======================================================================= hesaplar
+function bestOf(who, ex, mode = "kg", list = lifts) {
+  let best = null;
+  for (const l of list) if (l.who === who && l.ex === ex && (!best || score(l, mode) > score(best, mode))) best = l;
+  return best;
+}
+function ranking(ex, mode) {
+  return PEOPLE.map((p) => ({ who: p.id, best: bestOf(p.id, ex, mode) }))
+    .sort((a, b) => (b.best ? score(b.best, mode) : -1) - (a.best ? score(a.best, mode) : -1));
+}
+function big3() {
+  return PEOPLE.map((p) => {
+    const parts = BIG3.map((ex) => bestOf(p.id, ex, "1rm"));
+    return { who: p.id, total: parts.reduce((a, l) => a + (l ? e1rm(l.kg, l.reps) : 0), 0), done: parts.filter(Boolean).length };
+  }).sort((a, b) => b.total - a.total);
+}
+function weekStart() { const d = new Date(); const day = (d.getDay() + 6) % 7; d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - day); return d.getTime(); }
+function thisWeek() {
+  const ws = weekStart();
+  return PEOPLE.map((p) => {
+    const mine = lifts.filter((l) => l.who === p.id && l.at >= ws);
+    return { who: p.id, days: new Set(mine.map((l) => new Date(l.at).toDateString())).size, vol: mine.reduce((a, l) => a + l.kg * l.reps * (l.sets || 1), 0) };
+  });
+}
+function isPR(l) {   // o kaydın anında kişisel rekor olup olmadığı
+  return !lifts.some((o) => o !== l && o.who === l.who && o.ex === l.ex && o.at < l.at && o.kg >= l.kg);
+}
+
+// ======================================================================= görünümler
+function render() {
+  const app = $("#app");
+  if (!me) { renderLogin(app); $("#tabs").hidden = true; return; }
+  $("#tabs").hidden = false;
+  renderTabs();
+  const head = `<header><div class="logo">Neon Salon<small>KERMAN · BUĞRA · ARDA</small></div>
+    <button class="me-chip" type="button" data-act="logout" aria-label="Kullanıcı değiştir">${av(me)}${esc(me)}</button></header>`;
+  const status = dbState === "slow" ? `<div class="note">Kayıtlara ulaşılamıyor; gösterilenler güncel olmayabilir.</div>`
+    : dbState === "local" ? `<div class="note">Ortak kayıt bağlantısı yok: bu cihazda kaydediliyor, arkadaşların göremez.</div>`
+    : dbState === "error" ? `<div class="note">Kayıtlar okunamadı. Sayfayı daha sonra tekrar aç.</div>` : "";
+  let body = "";
+  if (view === "kaydet") body = viewSave();
+  else if (view === "sira") body = viewRank();
+  else body = viewHistory();
+  app.innerHTML = head + status + body;
+}
+
+function renderLogin(app) {
+  app.innerHTML = `<div class="login">
+    <div class="logo" style="text-align:center">Neon Salon<small>AĞIRLIK KULÜBÜ</small></div>
+    <h1>Kim antrenmanda?</h1>
+    <p>Adına dokun, bu cihaz seni hatırlasın.</p>
+    <div class="who">${PEOPLE.map((p) => {
+      const n = lifts.filter((l) => l.who === p.id).length;
+      const last = lifts.find((l) => l.who === p.id);
+      return `<button type="button" data-login="${esc(p.id)}">${av(p.id, "lg")}<span><span class="nm">${esc(p.id)}</span><br>
+        <span class="st">${n ? `${n} kayıt · son: ${esc(last.ex)} ${fmt(last.kg)} kg` : "Henüz kayıt yok"}</span></span><span class="go">›</span></button>`;
+    }).join("")}</div></div>`;
+}
+
+const ICONS = {
+  kaydet: '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg>',
+  sira: '<svg viewBox="0 0 24 24"><path d="M8 21V11H3v10zM15 21V5h-6v16zM21 21v-7h-6v7z"/></svg>',
+  gecmis: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+};
+function renderTabs() {
+  $("#tabs").innerHTML = `<div class="in">${[["kaydet", "Kaydet"], ["sira", "Sıralama"], ["gecmis", "Geçmiş"]]
+    .map(([k, l]) => `<button type="button" class="${view === k ? "on" : ""}" data-view="${k}" aria-current="${view === k ? "page" : "false"}">${ICONS[k]}${l}</button>`).join("")}</div>`;
+}
+
+function viewSave() {
+  const mine = bestOf(me, form.ex, "kg");
+  const lead = ranking(form.ex, "kg")[0];
+  const exBtns = exList().map((x) => `<button type="button" class="ex ${x === form.ex ? "on" : ""}" data-ex="${esc(x)}">${esc(x)}</button>`).join("");
+  return `<section class="card">
+      <div class="label">Hareket</div>
+      <div class="ex-grid">${exBtns}<button type="button" class="ex add" data-act="add-ex">+ Hareket ekle</button></div>
+      ${addingEx ? `<form class="addrow" id="addex"><input type="text" id="newex" maxlength="40" placeholder="Örn. Cable Fly" autocomplete="off"><button class="st-btn" style="width:auto;padding:0 16px" type="submit">Ekle</button></form>` : ""}
+    </section>
+    <section class="card">
+      <div class="label">Ağırlık</div>
+      <div class="weight">
+        <div class="steps"><button type="button" class="st-btn" data-kg="-5">−5</button><button type="button" class="st-btn" data-kg="-2.5">−2,5</button></div>
+        <label class="wnum"><input type="number" inputmode="decimal" id="kg" step="0.5" min="0" value="${form.kg}" aria-label="Ağırlık (kg)"><span>KG</span></label>
+        <div class="steps"><button type="button" class="st-btn" data-kg="5">+5</button><button type="button" class="st-btn" data-kg="2.5">+2,5</button></div>
+      </div>
+      <div class="pair">
+        <div class="mini"><div class="label">Tekrar</div><div class="row"><button type="button" data-reps="-1" aria-label="Tekrarı azalt">−</button><b id="reps">${form.reps}</b><button type="button" data-reps="1" aria-label="Tekrarı artır">+</button></div></div>
+        <div class="mini"><div class="label">Set</div><div class="row"><button type="button" data-sets="-1" aria-label="Seti azalt">−</button><b id="sets">${form.sets}</b><button type="button" data-sets="1" aria-label="Seti artır">+</button></div></div>
+      </div>
+      <div class="hint">
+        <span>Rekorun: <b>${mine ? `${fmt(mine.kg)} kg × ${mine.reps}` : "yok"}</b></span>
+        <span>Lider: <b>${lead.best ? `${esc(lead.who)} ${fmt(lead.best.kg)} kg` : "henüz yok"}</b></span>
+        <span>Tahmini 1RM: <b>${fmt(e1rm(form.kg, form.reps))} kg</b></span>
+      </div>
+      <button type="button" class="save" data-act="save" ${dbState === "loading" ? "disabled" : ""}>KAYDET</button>
+    </section>`;
+}
+
+function viewRank() {
+  const r = ranking(rankEx, rankMode);
+  const val = (l) => rankMode === "1rm" ? fmt(e1rm(l.kg, l.reps)) : fmt(l.kg);
+  const order = [r[1], r[0], r[2]];
+  const cls = ["p2", "p1", "p3"], place = [2, 1, 3];
+  const pods = order.map((x, i) => `<div class="pod ${cls[i]} ${x.best ? "" : "empty"}">${av(x.who, i === 1 ? "lg" : "")}<div class="nm">${esc(x.who)}</div>
+      <div class="val">${x.best ? val(x.best) : "—"}<small> kg</small></div><div class="sub">${x.best ? `${fmt(x.best.kg)} × ${x.best.reps}` : "kayıt yok"}</div>
+      <div class="block">${place[i]}</div></div>`).join("");
+  const b3 = big3(), max3 = Math.max(1, ...b3.map((x) => x.total));
+  const wk = thisWeek(), maxv = Math.max(1, ...wk.map((x) => x.vol));
+  const col = { k: "var(--aqua)", b: "var(--pink)", a: "var(--sun)" };
+  const anyB3 = b3.some((x) => x.total > 0);
+  return `<section class="card">
+      <div class="label">Kim daha ağır kaldırıyor?</div>
+      <select id="rankEx" aria-label="Hareket seç">${exList().map((x) => `<option${x === rankEx ? " selected" : ""}>${esc(x)}</option>`).join("")}</select>
+      <div class="seg" role="group" aria-label="Sıralama ölçütü"><button type="button" data-mode="kg" class="${rankMode === "kg" ? "on" : ""}">En ağır kaldırış</button><button type="button" data-mode="1rm" class="${rankMode === "1rm" ? "on" : ""}">Tahmini 1RM</button></div>
+      <div class="podium">${pods}</div>
+      <div class="muted" style="font-size:13px">${rankMode === "1rm" ? "Tahmini 1RM = kg × (1 + tekrar/30). Farklı tekrar sayılarını adil karşılaştırır." : "Eşit ağırlıkta daha çok tekrar yapan öne geçer."}</div>
+    </section>
+    <section class="card">
+      <div class="label">Big 3 toplamı</div>
+      <div class="muted" style="font-size:13px;margin-top:-8px">Bench + Squat + Deadlift tahmini 1RM toplamı</div>
+      ${anyB3 ? `<div class="rank-list">${b3.map((x, i) => `<div class="rrow"><span class="pos">${i + 1}</span>${av(x.who)}<span><b>${esc(x.who)}</b><br><span class="muted" style="font-size:12px">${x.done}/3 hareket</span></span><span class="v">${fmt(x.total, 0)} kg</span></div>`).join("")}</div>`
+        : `<div class="empty"><b>Henüz Big 3 kaydı yok</b>Bench, squat veya deadlift kaydedince burada toplam sıralama çıkar.</div>`}
+    </section>
+    <section class="card">
+      <div class="label">Bu hafta</div>
+      <div class="bars">${wk.map((x) => `<div class="bar">${av(x.who)}<div class="track"><div class="fill" style="width:${Math.max(3, x.vol / maxv * 100)}%;background:${col[person(x.who).cls]};opacity:.55"></div>
+        <div class="t"><span>${x.days} gün</span><span>${fmt(x.vol / 1000, 1)} ton</span></div></div></div>`).join("")}</div>
+      <div class="muted" style="font-size:12px">Toplam yük = kg × tekrar × set, pazartesiden beri.</div>
+    </section>`;
+}
+
+function spark(ex) {
+  const pts = lifts.filter((l) => l.who === me && l.ex === ex).sort((a, b) => a.at - b.at);
+  if (pts.length < 2) return `<div class="empty"><b>${pts.length ? "Bir kayıt daha gerekli" : "Bu harekette kaydın yok"}</b>İki kayıttan sonra gelişim çizgin burada görünür.</div>`;
+  const W = 520, H = 160, pl = 36, pr = 14, pt = 14, pb = 24;
+  const ys = pts.map((p) => p.kg), lo = Math.floor(Math.min(...ys) * 0.95), hi = Math.ceil(Math.max(...ys) * 1.03);
+  const x = (i) => pl + i * (W - pl - pr) / (pts.length - 1), y = (v) => pt + (hi - v) * (H - pt - pb) / (hi - lo || 1);
+  const line = pts.map((p, i) => `${x(i)},${y(p.kg)}`).join(" ");
+  const area = `${pl},${H - pb} ${line} ${x(pts.length - 1)},${H - pb}`;
+  const last = pts[pts.length - 1], first = pts[0];
+  const ticks = [lo, Math.round((lo + hi) / 2), hi].map((v) => `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.1)"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#b3a3d6">${v}</text>`).join("");
+  const d = (t) => new Date(t).toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(ex)} ilerleme grafiği">
+      <defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff4fa8" stop-opacity=".45"/><stop offset="1" stop-color="#ff4fa8" stop-opacity="0"/></linearGradient></defs>
+      ${ticks}<polygon points="${area}" fill="url(#ga)"/><polyline points="${line}" fill="none" stroke="#ff4fa8" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="${x(pts.length - 1)}" cy="${y(last.kg)}" r="6" fill="#22e6d4" stroke="#140b2b" stroke-width="2"/>
+      <text x="${pl}" y="${H - 6}" font-size="11" fill="#b3a3d6">${d(first.at)}</text><text x="${W - pr}" y="${H - 6}" text-anchor="end" font-size="11" fill="#b3a3d6">${d(last.at)}</text>
+    </svg><div class="hint"><span>İlk: <b>${fmt(first.kg)} kg</b></span><span>Son: <b>${fmt(last.kg)} kg</b></span><span>Fark: <b>${last.kg - first.kg >= 0 ? "+" : ""}${fmt(last.kg - first.kg)} kg</b></span></div>`;
+}
+
+function viewHistory() {
+  const myEx = [...new Set(lifts.filter((l) => l.who === me).map((l) => l.ex))];
+  if (!histEx || !myEx.includes(histEx)) histEx = myEx[0] || form.ex;
+  const items = lifts.slice(0, 120);
+  let lastDay = "", feed = "";
+  for (const l of items) {
+    const dd = new Date(l.at), day = dd.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+    if (day !== lastDay) { feed += `<div class="day">${esc(day.toLocaleUpperCase("tr-TR"))}</div>`; lastDay = day; }
+    const mineItem = l.who === me;
+    feed += `<div class="item">${av(l.who)}<div class="t"><b>${esc(l.who)}</b> · ${esc(l.ex)}${isPR(l) ? '<span class="pr">PR</span>' : ""}
+      <div>${l.reps} tekrar × ${l.sets || 1} set · ${dd.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</div></div>
+      <div class="kg">${fmt(l.kg)} <span class="muted" style="font-size:13px">kg</span>${mineItem ? `<br><button type="button" class="del ${delAsk === l.id ? "sure" : ""}" data-del="${esc(l.id)}">${delAsk === l.id ? "Emin misin? Sil" : "Sil"}</button>` : ""}</div></div>`;
+  }
+  return `<section class="card">
+      <div class="label">Senin gelişimin</div>
+      <select id="histEx" aria-label="Hareket seç">${(myEx.length ? myEx : exList()).map((x) => `<option${x === histEx ? " selected" : ""}>${esc(x)}</option>`).join("")}</select>
+      ${spark(histEx)}
+    </section>
+    <section class="card">
+      <div class="label">Son kayıtlar</div>
+      ${items.length ? `<div class="feed">${feed}</div>` : `<div class="empty"><b>Henüz kayıt yok</b>İlk ağırlığı Kaydet sekmesinden gir; buraya herkesin kayıtları düşer.</div>`}
+    </section>`;
+}
+
+// ======================================================================= kutlama
+function toast(msg) {
+  const t = $("#toast");
+  t.innerHTML = `<div class="toast">${esc(msg)}</div>`;
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.innerHTML = ""), 2400);
+}
+function celebrate(text) {
+  $("#cele").innerHTML = `<div>${esc(text)}</div>`;
+  setTimeout(() => ($("#cele").innerHTML = ""), 1900);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("#fx"), g = c.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; g.scale(dpr, dpr);
+  const cols = ["#ff4fa8", "#22e6d4", "#ffb24a", "#fbf2ff", "#ffd76a"];
+  const P = Array.from({ length: 140 }, () => ({ x: innerWidth / 2, y: innerHeight * 0.45, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, r: Math.random() * 360, s: 5 + Math.random() * 6, c: cols[Math.random() * cols.length | 0] }));
+  let n = 0;
+  (function tick() {
+    g.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of P) { p.vy += .38; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vx * 2; g.save(); g.translate(p.x, p.y); g.rotate(p.r * Math.PI / 180); g.fillStyle = p.c; g.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); g.restore(); }
+    if (++n < 110) requestAnimationFrame(tick); else g.clearRect(0, 0, innerWidth, innerHeight);
+  })();
+}
+
+// ======================================================================= veri (ortak kayıt)
+async function saveLift() {
+  const kg = Math.round(Number(form.kg) * 100) / 100;
+  if (!Number.isFinite(kg) || kg <= 0) return toast("Ağırlığı 0'dan büyük gir.");
+  const prevBest = bestOf(me, form.ex, "kg");
+  const prevLead = ranking(form.ex, "kg")[0];
+  const rec = { who: me, ex: form.ex, kg, reps: form.reps, sets: form.sets, at: Date.now() };
+  const btn = document.querySelector("[data-act=save]");
+  if (btn) btn.disabled = true;
+  try {
+    if (db) await db.collection("lifts").add(rec);
+    else { rec.id = "l" + rec.at; lifts.unshift(rec); LS.set("local", lifts); render(); }
+    const pr = !prevBest || kg > prevBest.kg;
+    const lead = prevLead.who !== me && (!prevLead.best || kg > prevLead.best.kg);
+    if (lead) celebrate("LİDER SENSİN!");
+    else if (pr) celebrate(prevBest ? "YENİ REKOR!" : "İLK KAYIT!");
+    else toast(`${form.ex} ${fmt(kg)} kg kaydedildi`);
+  } catch (e) {
+    toast(e && e.code === "quota_exceeded" ? "Kayıt alanı doldu; eski kayıtları silmek gerekiyor." : "Kaydedilemedi. Bağlantını kontrol edip tekrar dene.");
+  } finally {
+    const b = document.querySelector("[data-act=save]");
+    if (b) b.disabled = false;
+  }
+}
+
+async function deleteLift(id) {
+  try {
+    if (db) await db.doc("lifts/" + id).delete();
+    else { lifts = lifts.filter((l) => l.id !== id); LS.set("local", lifts); render(); }
+    toast("Kayıt silindi");
+  } catch (e) { toast("Silinemedi. Tekrar dene."); }
+}
+
+async function addExercise(name) {
+  name = name.trim().replace(/\s+/g, " ");
+  if (!name) return;
+  if (exList().some((x) => x.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR"))) { form.ex = exList().find((x) => x.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR")); addingEx = false; render(); return; }
+  const next = [...customEx, name];
+  try {
+    if (db) await db.doc("meta/exercises").set({ list: next });
+    else { customEx = next; LS.set("customEx", next); }
+    customEx = next; form.ex = name; addingEx = false; LS.set("form", form); render();
+  } catch (e) { toast("Hareket eklenemedi."); }
+}
+
+async function connect() {
+  let timer = setTimeout(() => { if (dbState === "loading") { dbState = "slow"; render(); } }, 10000);
+  try { db = window.claude && claude.use ? await claude.use("db") : null; } catch (e) { db = null; }
+  if (!db) {
+    clearTimeout(timer);
+    dbState = "local";
+    lifts = LS.get("local", []); customEx = LS.get("customEx", []);
+    render();
+    return;
+  }
+  db.collection("lifts").orderBy("at", "desc").limit(1000).onSnapshot((snap) => {
+    lifts = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((l) => l.who && l.ex && Number.isFinite(l.kg));
+    if (!snap.metadata.fromCache) { clearTimeout(timer); dbState = "live"; }
+    else if (dbState === "loading") dbState = "live";
+    renderKeepInputs();
+  }, () => { clearTimeout(timer); dbState = "error"; render(); });
+  db.doc("meta/exercises").onSnapshot((s) => {
+    const list = s.exists && Array.isArray(s.data().list) ? s.data().list.filter((x) => typeof x === "string").slice(0, 60) : [];
+    customEx = list;
+    renderKeepInputs();
+  }, () => {});
+}
+
+function renderKeepInputs() {
+  // biri yazarken ekranı yeniden çizip girdiyi bozma
+  const a = document.activeElement;
+  if (a && (a.id === "kg" || a.id === "newex")) return;
+  render();
+}
+
+// ======================================================================= etkileşim
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.login) { me = t.dataset.login; LS.set("me", me); view = "kaydet"; const last = bestOf(me, form.ex); if (last) form.kg = last.kg; render(); return; }
+  if (t.dataset.view) { view = t.dataset.view; LS.set("view", view); delAsk = ""; render(); window.scrollTo({ top: 0 }); return; }
+  if (t.dataset.ex) {
+    form.ex = t.dataset.ex;
+    const last = lifts.find((l) => l.who === me && l.ex === form.ex);
+    if (last) { form.kg = last.kg; form.reps = last.reps; form.sets = last.sets || form.sets; }
+    LS.set("form", form); render(); return;
+  }
+  if (t.dataset.kg) { form.kg = Math.max(0, Math.round((Number(form.kg) + Number(t.dataset.kg)) * 10) / 10); LS.set("form", form); $("#kg").value = form.kg; render(); return; }
+  if (t.dataset.reps) { form.reps = Math.max(1, Math.min(50, form.reps + Number(t.dataset.reps))); LS.set("form", form); render(); return; }
+  if (t.dataset.sets) { form.sets = Math.max(1, Math.min(20, form.sets + Number(t.dataset.sets))); LS.set("form", form); render(); return; }
+  if (t.dataset.mode) { rankMode = t.dataset.mode; LS.set("rankMode", rankMode); render(); return; }
+  if (t.dataset.del) { if (delAsk === t.dataset.del) { delAsk = ""; deleteLift(t.dataset.del); } else { delAsk = t.dataset.del; render(); } return; }
+  const act = t.dataset.act;
+  if (act === "save") saveLift();
+  else if (act === "logout") { me = ""; LS.set("me", ""); render(); }
+  else if (act === "add-ex") { addingEx = !addingEx; render(); if (addingEx) setTimeout(() => $("#newex")?.focus(), 30); }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id === "kg") { const v = parseFloat(String(e.target.value).replace(",", ".")); if (Number.isFinite(v)) { form.kg = v; LS.set("form", form); } }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "kg") render();
+  if (e.target.id === "rankEx") { rankEx = e.target.value; LS.set("rankEx", rankEx); render(); }
+  if (e.target.id === "histEx") { histEx = e.target.value; LS.set("histEx", histEx); render(); }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "addex") { e.preventDefault(); addExercise($("#newex").value); }
+});
+
+render();
+connect();
+</script>
