@@ -16,6 +16,14 @@ assert.equal(b.lift.kg, 102.5);
 for (const [bad, why] of [[{ who: "Yabancı", ex: "Squat", kg: 50, reps: 5 }, "kişi"], [{ who: "Arda", ex: "", kg: 50, reps: 5 }, "hareket"],
   [{ who: "Arda", ex: "Squat", kg: 0, reps: 5 }, "kg"], [{ who: "Arda", ex: "Squat", kg: 5000, reps: 5 }, "kg üst"], [{ who: "Arda", ex: "Squat", kg: 50, reps: 0 }, "tekrar"]])
   assert.equal((await api("lift", bad)).status, 400, "geçersiz " + why);
+// set set (piramit): kg/reps en ağır setten, set sayısı listeden
+await new Promise((r) => setTimeout(r, 5));
+const p = await api("lift", { who: "Buğra", ex: "Bench Press", detail: [{ kg: 15, reps: 12 }, { kg: "17.5", reps: 10 }, { kg: 20, reps: 8 }, { kg: 20, reps: 9 }] });
+assert.equal(p.ok, true); assert.equal(p.lift.kg, 20); assert.equal(p.lift.reps, 9); assert.equal(p.lift.sets, 4);
+assert.deepEqual(p.lift.detail[1], { kg: 17.5, reps: 10 });
+for (const d of [[], [{ kg: 0, reps: 5 }], [{ kg: 20, reps: 0 }], Array(21).fill({ kg: 10, reps: 5 })])
+  assert.equal((await api("lift", { who: "Buğra", ex: "Squat", detail: d })).status, 400, "geçersiz detay");
+await api("delete", { id: p.lift.id });
 let st = await api("state");
 assert.deepEqual(st.lifts.map((l) => l.who), ["Arda", "Kerman"], "yeniden eskiye sıralı");
 assert.equal((await api("state?rev=" + st.rev)).same, true, "değişmediyse boş cevap");
@@ -33,4 +41,4 @@ await api("delete", { id: a.lift.id });
 st = await api("state");
 assert.ok(!st.lifts.some((l) => l.id === a.lift.id));
 assert.equal(st.lifts.length, 2);
-console.log("✓ api: anahtar, doğrulama, sıralama, rev, taşıma, hareket ekleme, silme");
+console.log("✓ api: anahtar, set set giriş, doğrulama, sıralama, rev, taşıma, hareket ekleme, silme");

@@ -167,6 +167,51 @@ select { font-weight: 600; }
 .mini .row { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
 .mini .row b { text-align: center; font-family: var(--f-num); font-size: 38px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .mini button { height: 44px; border-radius: 12px; background: rgba(255, 255, 255, .06); font-size: 22px; font-weight: 600; }
+/* takvim + son ağırlıklar */
+.ex small { display: block; margin-top: 3px; font-size: 11px; font-weight: 500; color: var(--muted); }
+.calhead { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; text-align: center; }
+.calhead b { font-family: var(--f-wide); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+.calhead button { height: 40px; border-radius: 12px; background: rgba(255, 255, 255, .06); font-size: 22px; }
+.calhead button[disabled] { opacity: .25; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.cal > span { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 1px; padding-bottom: 2px; }
+.cal button { position: relative; aspect-ratio: 1; border-radius: 10px; font-weight: 600; font-size: 14px; color: var(--muted); background: rgba(255, 255, 255, .025); font-variant-numeric: tabular-nums; }
+.cal button.has { color: var(--night); background: linear-gradient(135deg, var(--pink), var(--peach)); font-weight: 800; }
+.cal button.today { box-shadow: inset 0 0 0 1px var(--teal); }
+.cal button.sel { outline: 2px solid var(--teal); outline-offset: 1px; }
+.cal button i { position: absolute; left: 0; right: 0; bottom: 1px; font-style: normal; font-size: 9px; line-height: 1; letter-spacing: 1px; }
+.lrows { display: grid; gap: 6px; }
+.lrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 14px; background: rgba(0, 0, 0, .26); border: 1px solid rgba(185, 166, 255, .1); }
+.lrow > span:first-child { min-width: 0; font-size: 13px; }
+.lrow b { font-size: 15px; }
+.lrow .v { font-family: var(--f-num); font-weight: 800; font-size: 24px; text-align: right; flex: none; }
+.lrow .v small { font-size: 12px; color: var(--muted); }
+/* set set giriş */
+.sets { display: grid; gap: 6px; }
+.shead, .srow { display: grid; grid-template-columns: 18px minmax(0, 1.35fr) minmax(0, 1fr) 30px; gap: 6px; align-items: center; }
+.shead { font-family: var(--f-wide); font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; text-align: center; }
+.srow { background: rgba(0, 0, 0, .28); border: 1px solid rgba(185, 166, 255, .1); border-radius: 14px; padding: 5px 4px; }
+.sn { font-family: var(--f-num); font-weight: 800; color: var(--pink); text-align: center; font-size: 17px; }
+.sk { display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; gap: 2px; }
+.sk > button { height: 40px; border-radius: 10px; background: rgba(255, 255, 255, .06); font-size: 20px; font-weight: 600; }
+.sk > button:active { background: rgba(255, 95, 174, .25); }
+.sk label { display: flex; align-items: baseline; justify-content: center; min-width: 0; }
+.sk input[type=number] { width: 100%; min-width: 0; text-align: center; font-family: var(--f-num); font-weight: 800; font-size: 24px; background: none; border: 0; border-radius: 8px; padding: 4px 0;
+  font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+.sk input:focus { outline: none; background: rgba(63, 240, 216, .1); }
+.sk input::-webkit-inner-spin-button, .sk input::-webkit-outer-spin-button, .pyr input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sx { height: 40px; border-radius: 10px; color: var(--muted); font-size: 20px; }
+.sx[disabled] { opacity: .2; }
+.sadd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.sadd button { padding: 10px 4px; border-radius: 12px; border: 1px dashed rgba(63, 240, 216, .45); color: var(--teal); font-weight: 600; font-size: 13px; background: rgba(255, 255, 255, .03); }
+.sadd button.on { background: rgba(63, 240, 216, .14); border-style: solid; }
+.pyr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 10px; border-radius: 14px; background: rgba(0, 0, 0, .28); border: 1px solid rgba(63, 240, 216, .25); }
+.pyr label { display: grid; gap: 4px; font-size: 11px; color: var(--muted); text-align: center; }
+.pyr input[type=number] { padding: 9px 4px; text-align: center; font-weight: 700; }
+.pyr .go { grid-column: 1 / -1; height: 42px; border-radius: 12px; background: linear-gradient(135deg, rgba(63, 240, 216, .3), rgba(255, 95, 174, .25)); font-weight: 700; }
+.prev { font-size: 13px; color: var(--muted); padding: 8px 10px; border-radius: 12px; background: rgba(255, 179, 138, .07); border: 1px solid rgba(255, 179, 138, .2); }
+.prev b { color: var(--cream); font-variant-numeric: tabular-nums; }
+.item .sets-t { font-variant-numeric: tabular-nums; color: var(--cream) !important; opacity: .85; }
 .hint { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .hint b { color: var(--cream); }
 .save { position: relative; height: 64px; border-radius: 16px; font-family: var(--f-wide); font-weight: 700; font-size: 17px; letter-spacing: 6px; color: var(--night); overflow: hidden;
@@ -302,6 +347,11 @@ let customEx = [];
 let dbState = "loading";      // loading | live | slow | local | error
 let db = null;
 const form = LS.get("form", { ex: "Bench Press", kg: 60, reps: 8, sets: 3 });
+if (!Array.isArray(form.rows) || !form.rows.length)   // eski tek satırlık formu set listesine çevir
+  form.rows = Array.from({ length: Math.min(20, form.sets || 3) }, () => ({ kg: Number(form.kg) || 20, reps: form.reps || 8 }));
+let pyrOpen = false;
+let calOff = 0, calDay = "";   // takvim: ay kaydırma, seçili gün (YYYY-AA-GG)
+const dayKey = (t) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 let rankEx = LS.get("rankEx", "Bench Press");
 let rankMode = LS.get("rankMode", "kg");     // kg | 1rm
 let histEx = LS.get("histEx", "");
@@ -318,7 +368,14 @@ const av = (id, cls = "") => {
 };
 const exList = () => [...BASE_EX, ...customEx.filter((x) => !BASE_EX.includes(x))];
 const e1rm = (kg, reps) => reps <= 1 ? kg : kg * (1 + reps / 30);    // Epley
-const score = (l, mode) => mode === "1rm" ? e1rm(l.kg, l.reps) : l.kg + l.reps / 1000;   // eşit kg'de tekrar sayısı öne geçirir
+const setsOf = (l) => Array.isArray(l.detail) && l.detail.length ? l.detail : Array.from({ length: Math.min(20, l.sets || 1) }, () => ({ kg: l.kg, reps: l.reps }));
+const best1rm = (l) => Math.max(...setsOf(l).map((s) => e1rm(s.kg, s.reps)));
+const volOf = (l) => setsOf(l).reduce((a, s) => a + s.kg * s.reps, 0);
+const setsText = (l) => l.detail ? l.detail.map((s) => `${fmt(s.kg)}×${s.reps}`).join(" · ") : `${fmt(l.kg)} kg × ${l.reps} tekrar × ${l.sets || 1} set`;
+const lastOf = (who, ex) => lifts.find((l) => l.who === who && l.ex === ex);   // liste yeniden eskiye
+const ago = (t) => { const d = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(t).setHours(0, 0, 0, 0)) / 864e5); return d <= 0 ? "bugün" : d === 1 ? "dün" : `${d} gün önce`; };
+function loadRows(ex) { const l = lastOf(me, ex); if (l) form.rows = setsOf(l).map((s) => ({ kg: s.kg, reps: s.reps })); }
+const score = (l, mode) => mode === "1rm" ? best1rm(l) : l.kg + l.reps / 1000;   // eşit kg'de tekrar sayısı öne geçirir
 
 // ======================================================================= hesaplar
 function bestOf(who, ex, mode = "kg", list = lifts) {
@@ -333,7 +390,7 @@ function ranking(ex, mode) {
 function big3() {
   return PEOPLE.map((p) => {
     const parts = BIG3.map((ex) => bestOf(p.id, ex, "1rm"));
-    return { who: p.id, total: parts.reduce((a, l) => a + (l ? e1rm(l.kg, l.reps) : 0), 0), done: parts.filter(Boolean).length };
+    return { who: p.id, total: parts.reduce((a, l) => a + (l ? best1rm(l) : 0), 0), done: parts.filter(Boolean).length };
   }).sort((a, b) => b.total - a.total);
 }
 function weekStart() { const d = new Date(); const day = (d.getDay() + 6) % 7; d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - day); return d.getTime(); }
@@ -341,7 +398,7 @@ function thisWeek() {
   const ws = weekStart();
   return PEOPLE.map((p) => {
     const mine = lifts.filter((l) => l.who === p.id && l.at >= ws);
-    return { who: p.id, days: new Set(mine.map((l) => new Date(l.at).toDateString())).size, vol: mine.reduce((a, l) => a + l.kg * l.reps * (l.sets || 1), 0) };
+    return { who: p.id, days: new Set(mine.map((l) => new Date(l.at).toDateString())).size, vol: mine.reduce((a, l) => a + volOf(l), 0) };
   });
 }
 function isPR(l) {   // o kaydın anında kişisel rekor olup olmadığı
@@ -390,45 +447,64 @@ function renderLogin(app) {
 const ICONS = {
   kaydet: '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg>',
   sira: '<svg viewBox="0 0 24 24"><path d="M8 21V11H3v10zM15 21V5h-6v16zM21 21v-7h-6v7z"/></svg>',
-  gecmis: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+  gecmis: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
 };
 function renderTabs() {
-  $("#tabs").innerHTML = `<div class="in">${[["kaydet", "Kaydet"], ["sira", "Sıralama"], ["gecmis", "Geçmiş"]]
+  $("#tabs").innerHTML = `<div class="in">${[["kaydet", "Kaydet"], ["gecmis", "Takip"], ["sira", "Sıralama"]]
     .map(([k, l]) => `<button type="button" class="${view === k ? "on" : ""}" data-view="${k}" aria-current="${view === k ? "page" : "false"}">${ICONS[k]}${l}</button>`).join("")}</div>`;
 }
 
-function viewSave() {
+function sumHtml() {
+  const rows = form.rows.filter((r) => r.kg > 0 && r.reps > 0);
   const mine = bestOf(me, form.ex, "kg");
   const lead = ranking(form.ex, "kg")[0];
-  const exBtns = exList().map((x) => `<button type="button" class="ex ${x === form.ex ? "on" : ""}" data-ex="${esc(x)}">${esc(x)}</button>`).join("");
+  const top = rows.length ? Math.max(...rows.map((r) => r.kg)) : 0;
+  return `<span>Rekorun: <b>${mine ? `${fmt(mine.kg)} kg × ${mine.reps}` : "yok"}</b></span>
+    <span>Bugün en ağır: <b>${fmt(top)} kg</b></span>
+    <span>Toplam yük: <b>${fmt(rows.reduce((a, r) => a + r.kg * r.reps, 0), 0)} kg</b></span>
+    <span>Tahmini 1RM: <b>${rows.length ? fmt(Math.max(...rows.map((r) => e1rm(r.kg, r.reps)))) : "—"} kg</b></span>
+    <span>Lider: <b>${lead.best ? `${esc(lead.who)} ${fmt(lead.best.kg)} kg` : "henüz yok"}</b></span>`;
+}
+function viewSave() {
+  const last = lastOf(me, form.ex);
+  const rows = form.rows;
+  const exBtns = exList().map((x) => { const l = lastOf(me, x);
+    return `<button type="button" class="ex ${x === form.ex ? "on" : ""}" data-ex="${esc(x)}">${esc(x)}${l ? `<small>son ${fmt(l.kg)} kg · ${ago(l.at)}</small>` : ""}</button>`; }).join("");
+  const rowHtml = rows.map((r, i) => `<div class="srow"><span class="sn">${i + 1}</span>
+      <div class="sk"><button type="button" data-rkg="${i}" data-d="-2.5" aria-label="${i + 1}. set 2,5 kg azalt">−</button>
+        <label><input type="number" inputmode="decimal" step="0.5" min="0" id="rkg-${i}" data-i="${i}" data-f="kg" value="${r.kg}" aria-label="${i + 1}. set kg"></label>
+        <button type="button" data-rkg="${i}" data-d="2.5" aria-label="${i + 1}. set 2,5 kg artır">+</button></div>
+      <div class="sk"><button type="button" data-rrep="${i}" data-d="-1" aria-label="${i + 1}. set tekrar azalt">−</button>
+        <label><input type="number" inputmode="numeric" step="1" min="1" id="rrp-${i}" data-i="${i}" data-f="reps" value="${r.reps}" aria-label="${i + 1}. set tekrar"></label>
+        <button type="button" data-rrep="${i}" data-d="1" aria-label="${i + 1}. set tekrar artır">+</button></div>
+      <button type="button" class="sx" data-rdel="${i}" aria-label="${i + 1}. seti sil"${rows.length < 2 ? " disabled" : ""}>×</button></div>`).join("");
+  const p0 = rows[0], pl = rows[rows.length - 1];
+  const pyr = pyrOpen ? `<div class="pyr">
+      <label>Başlangıç kg<input type="number" inputmode="decimal" id="pyr-a" value="${p0.kg}"></label>
+      <label>Bitiş kg<input type="number" inputmode="decimal" id="pyr-b" value="${pl.kg > p0.kg ? pl.kg : p0.kg + 5}"></label>
+      <label>Set<input type="number" inputmode="numeric" id="pyr-n" value="${Math.max(3, rows.length)}"></label>
+      <label>Tekrar<input type="number" inputmode="numeric" id="pyr-r" value="${p0.reps}"></label>
+      <button type="button" class="go" data-act="pyr-make">Setleri oluştur</button></div>` : "";
   return `<section class="card">
       <div class="label">Hareket</div>
       <div class="ex-grid">${exBtns}<button type="button" class="ex add" data-act="add-ex">+ Hareket ekle</button></div>
       ${addingEx ? `<form class="addrow" id="addex"><input type="text" id="newex" maxlength="40" placeholder="Örn. Cable Fly" autocomplete="off"><button class="st-btn" style="width:auto;padding:0 16px" type="submit">Ekle</button></form>` : ""}
     </section>
     <section class="card">
-      <div class="label">Ağırlık</div>
-      <div class="weight">
-        <div class="steps"><button type="button" class="st-btn" data-kg="-5">−5</button><button type="button" class="st-btn" data-kg="-2.5">−2,5</button></div>
-        <label class="wnum"><input type="number" inputmode="decimal" id="kg" step="0.5" min="0" value="${form.kg}" aria-label="Ağırlık (kg)"><span>KG</span></label>
-        <div class="steps"><button type="button" class="st-btn" data-kg="5">+5</button><button type="button" class="st-btn" data-kg="2.5">+2,5</button></div>
-      </div>
-      <div class="pair">
-        <div class="mini"><div class="label">Tekrar</div><div class="row"><button type="button" data-reps="-1" aria-label="Tekrarı azalt">−</button><b id="reps">${form.reps}</b><button type="button" data-reps="1" aria-label="Tekrarı artır">+</button></div></div>
-        <div class="mini"><div class="label">Set</div><div class="row"><button type="button" data-sets="-1" aria-label="Seti azalt">−</button><b id="sets">${form.sets}</b><button type="button" data-sets="1" aria-label="Seti artır">+</button></div></div>
-      </div>
-      <div class="hint">
-        <span>Rekorun: <b>${mine ? `${fmt(mine.kg)} kg × ${mine.reps}` : "yok"}</b></span>
-        <span>Lider: <b>${lead.best ? `${esc(lead.who)} ${fmt(lead.best.kg)} kg` : "henüz yok"}</b></span>
-        <span>Tahmini 1RM: <b>${fmt(e1rm(form.kg, form.reps))} kg</b></span>
-      </div>
-      <button type="button" class="save" data-act="save">KAYDET</button>
+      <div class="label">Setler · ${esc(form.ex)}</div>
+      ${last ? `<div class="prev">Geçen sefer (${ago(last.at)}): <b>${setsText(last)}</b></div>` : ""}
+      <div class="sets"><div class="shead"><span>#</span><span>KG</span><span>Tekrar</span><span></span></div>${rowHtml}</div>
+      <div class="sadd"><button type="button" data-act="set-same">+ Aynı set</button><button type="button" data-act="set-up">+ 2,5 kg ağır</button>
+        <button type="button" data-act="pyr" class="${pyrOpen ? "on" : ""}">Piramit kur</button></div>
+      ${pyr}
+      <div class="hint" id="sum">${sumHtml()}</div>
+      <button type="button" class="save" data-act="save">KAYDET · ${rows.length} SET</button>
     </section>`;
 }
 
 function viewRank() {
   const r = ranking(rankEx, rankMode);
-  const val = (l) => rankMode === "1rm" ? fmt(e1rm(l.kg, l.reps)) : fmt(l.kg);
+  const val = (l) => rankMode === "1rm" ? fmt(best1rm(l)) : fmt(l.kg);
   const order = [r[1], r[0], r[2]];
   const cls = ["p2", "p1", "p3"], place = [2, 1, 3];
   const pods = order.map((x, i) => `<div class="pod ${cls[i]} ${x.best ? "" : "empty"}">${av(x.who, i === 1 ? "lg" : "")}<div class="nm">${esc(x.who)}</div>
@@ -443,7 +519,7 @@ function viewRank() {
       <select id="rankEx" aria-label="Hareket seç">${exList().map((x) => `<option${x === rankEx ? " selected" : ""}>${esc(x)}</option>`).join("")}</select>
       <div class="seg" role="group" aria-label="Sıralama ölçütü"><button type="button" data-mode="kg" class="${rankMode === "kg" ? "on" : ""}">En ağır kaldırış</button><button type="button" data-mode="1rm" class="${rankMode === "1rm" ? "on" : ""}">Tahmini 1RM</button></div>
       <div class="podium">${pods}</div>
-      <div class="muted" style="font-size:13px">${rankMode === "1rm" ? "Tahmini 1RM = kg × (1 + tekrar/30). Farklı tekrar sayılarını adil karşılaştırır." : "Eşit ağırlıkta daha çok tekrar yapan öne geçer."}</div>
+      <div class="muted" style="font-size:13px">${rankMode === "1rm" ? "Tahmini 1RM = kg × (1 + tekrar/30), en iyi setten. Farklı tekrar sayılarını adil karşılaştırır." : "Eşit ağırlıkta daha çok tekrar yapan öne geçer."}</div>
     </section>
     <section class="card">
       <div class="label">Big 3 toplamı</div>
@@ -455,7 +531,11 @@ function viewRank() {
       <div class="label">Bu hafta</div>
       <div class="bars">${wk.map((x) => `<div class="bar">${av(x.who)}<div class="track"><div class="fill" style="width:${Math.max(3, x.vol / maxv * 100)}%;background:${col[person(x.who).cls]};opacity:.55"></div>
         <div class="t"><span>${x.days} gün</span><span>${fmt(x.vol / 1000, 1)} ton</span></div></div></div>`).join("")}</div>
-      <div class="muted" style="font-size:12px">Toplam yük = kg × tekrar × set, pazartesiden beri.</div>
+      <div class="muted" style="font-size:12px">Toplam yük = her setin kg × tekrarı toplamı, pazartesiden beri.</div>
+    </section>
+    <section class="card">
+      <div class="label">Grupta son antrenmanlar</div>
+      ${lifts.length ? `<div class="feed">${lifts.slice(0, 15).map((l) => liftItem(l, true)).join("")}</div>` : `<div class="empty"><b>Henüz kayıt yok</b>İlk antrenmanı Kaydet sekmesinden gir.</div>`}
     </section>`;
 }
 
@@ -478,27 +558,52 @@ function spark(ex) {
     </svg><div class="hint"><span>İlk: <b>${fmt(first.kg)} kg</b></span><span>Son: <b>${fmt(last.kg)} kg</b></span><span>Fark: <b>${last.kg - first.kg >= 0 ? "+" : ""}${fmt(last.kg - first.kg)} kg</b></span></div>`;
 }
 
-function viewHistory() {
-  const myEx = [...new Set(lifts.filter((l) => l.who === me).map((l) => l.ex))];
-  if (!histEx || !myEx.includes(histEx)) histEx = myEx[0] || form.ex;
-  const items = lifts.slice(0, 120);
-  let lastDay = "", feed = "";
-  for (const l of items) {
-    const dd = new Date(l.at), day = dd.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
-    if (day !== lastDay) { feed += `<div class="day">${esc(day.toLocaleUpperCase("tr-TR"))}</div>`; lastDay = day; }
-    const mineItem = l.who === me;
-    feed += `<div class="item">${av(l.who)}<div class="t"><b>${esc(l.who)}</b> · ${esc(l.ex)}${isPR(l) ? '<span class="pr">PR</span>' : ""}
-      <div>${l.reps} tekrar × ${l.sets || 1} set · ${dd.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</div></div>
+const MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+function liftItem(l, showWho) {
+  const dd = new Date(l.at), mineItem = l.who === me;
+  return `<div class="item">${av(l.who)}<div class="t">${showWho ? `<b>${esc(l.who)}</b> · ` : ""}<b>${esc(l.ex)}</b>${isPR(l) ? '<span class="pr">PR</span>' : ""}
+      <div class="sets-t">${setsText(l)}</div><div>${showWho ? `${esc(new Date(l.at).toLocaleDateString("tr-TR", { day: "numeric", month: "short" }))} ` : ""}${dd.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}${l.detail ? ` · ${fmt(volOf(l), 0)} kg toplam yük` : ""}</div></div>
       <div class="kg">${fmt(l.kg)} <span class="muted" style="font-size:13px">kg</span>${mineItem ? `<br><button type="button" class="del ${delAsk === l.id ? "sure" : ""}" data-del="${esc(l.id)}">${delAsk === l.id ? "Emin misin? Sil" : "Sil"}</button>` : ""}</div></div>`;
+}
+function viewHistory() {
+  const mine = lifts.filter((l) => l.who === me);
+  const myEx = [...new Set(mine.map((l) => l.ex))];
+  if (!histEx || !myEx.includes(histEx)) histEx = myEx[0] || form.ex;
+  const byDay = new Map();
+  for (const l of mine) { const k = dayKey(l.at); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(l); }
+  if (!calDay) calDay = mine.length ? dayKey(mine[0].at) : dayKey(Date.now());
+  const base = new Date(); base.setHours(0, 0, 0, 0); base.setDate(1); base.setMonth(base.getMonth() + calOff);
+  const y = base.getFullYear(), m = base.getMonth(), nDays = new Date(y, m + 1, 0).getDate(), lead = (base.getDay() + 6) % 7, today = dayKey(Date.now());
+  let cells = "", monthDays = 0;
+  for (let i = 0; i < lead; i++) cells += "<span></span>";
+  for (let d = 1; d <= nDays; d++) {
+    const k = dayKey(new Date(y, m, d)), n = (byDay.get(k) || []).length;
+    if (n) monthDays++;
+    cells += `<button type="button" data-day="${k}" class="${n ? "has" : ""}${k === calDay ? " sel" : ""}${k === today ? " today" : ""}" aria-label="${d} ${MONTHS[m]}${n ? `, ${n} hareket` : ""}">${d}${n ? `<i>${"•".repeat(Math.min(3, n))}</i>` : ""}</button>`;
   }
+  const dayList = byDay.get(calDay) || [];
+  const [cy, cm, cd] = calDay.split("-").map(Number);
+  const dayTitle = new Date(cy, cm - 1, cd).toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+  const lastRows = myEx.map((ex) => { const l = lastOf(me, ex), best = bestOf(me, ex, "kg");
+    return `<button type="button" class="lrow" data-goex="${esc(ex)}"><span><b>${esc(ex)}</b><br><span class="muted">${setsText(l)} · ${ago(l.at)}</span></span>
+      <span class="v">${fmt(l.kg)}<small> kg</small>${best && best.kg > l.kg ? `<br><span class="muted" style="font-size:11px">rekor ${fmt(best.kg)}</span>` : ""}</span></button>`; }).join("");
   return `<section class="card">
-      <div class="label">Senin gelişimin</div>
-      <select id="histEx" aria-label="Hareket seç">${(myEx.length ? myEx : exList()).map((x) => `<option${x === histEx ? " selected" : ""}>${esc(x)}</option>`).join("")}</select>
-      ${spark(histEx)}
+      <div class="label">Takvimin</div>
+      <div class="calhead"><button type="button" data-cal="-1" aria-label="Önceki ay">‹</button><b>${MONTHS[m]} ${y}</b><button type="button" data-cal="1" aria-label="Sonraki ay"${calOff >= 0 ? " disabled" : ""}>›</button></div>
+      <div class="cal"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span>${cells}</div>
+      <div class="muted" style="font-size:13px">Bu ay <b style="color:var(--cream)">${monthDays} gün</b> antrenman yaptın.</div>
+      <div class="day">${esc(dayTitle.toLocaleUpperCase("tr-TR"))}</div>
+      ${dayList.length ? `<div class="feed">${dayList.map((l) => liftItem(l, false)).join("")}</div>` : `<div class="muted" style="font-size:14px">Bu gün kayıt yok.</div>`}
     </section>
     <section class="card">
-      <div class="label">Son kayıtlar</div>
-      ${items.length ? `<div class="feed">${feed}</div>` : `<div class="empty"><b>Henüz kayıt yok</b>İlk ağırlığı Kaydet sekmesinden gir; buraya herkesin kayıtları düşer.</div>`}
+      <div class="label">Son ağırlıkların</div>
+      ${lastRows ? `<div class="lrows">${lastRows}</div><div class="muted" style="font-size:12px">Dokun: o hareket geçen seferki setlerle açılır.</div>`
+        : `<div class="empty"><b>Henüz kaydın yok</b>Kaydet sekmesinden ilk setlerini gir.</div>`}
+    </section>
+    <section class="card">
+      <div class="label">Gelişim grafiğin</div>
+      <select id="histEx" aria-label="Hareket seç">${(myEx.length ? myEx : exList()).map((x) => `<option${x === histEx ? " selected" : ""}>${esc(x)}</option>`).join("")}</select>
+      ${spark(histEx)}
     </section>`;
 }
 
@@ -565,14 +670,21 @@ async function pull() {
 }
 
 async function saveLift() {
-  const kg = Math.round(Number(form.kg) * 100) / 100;
-  if (!Number.isFinite(kg) || kg <= 0) return toast("Ağırlığı 0'dan büyük gir.");
+  // ekrandaki kutuları son kez oku (boş bırakılan kutu eski değeri sessizce kullanmasın)
+  for (const inp of document.querySelectorAll("[data-f]")) {
+    const i = Number(inp.dataset.i), f = inp.dataset.f, v = parseFloat(String(inp.value).replace(",", "."));
+    if (!Number.isFinite(v) || v <= 0) { inp.focus(); return toast(`${i + 1}. setin ${f === "kg" ? "kilosunu" : "tekrarını"} gir.`); }
+    form.rows[i][f] = f === "kg" ? Math.round(v * 100) / 100 : Math.round(v);
+  }
+  LS.set("form", form);
+  const detail = form.rows.map((r) => ({ kg: r.kg, reps: r.reps }));
+  const kg = Math.max(...detail.map((r) => r.kg));
   const prevBest = bestOf(me, form.ex, "kg");
   const prevLead = ranking(form.ex, "kg")[0];
   const btn = document.querySelector("[data-act=save]");
   if (btn) btn.disabled = true;
   try {
-    const r = await api("lift", { who: me, ex: form.ex, kg, reps: form.reps, sets: form.sets });
+    const r = await api("lift", { who: me, ex: form.ex, detail });
     lifts.unshift(r.lift);
     rev = null;   // sonraki çekişte tam listeyi al
     render();
@@ -580,7 +692,7 @@ async function saveLift() {
     const lead = prevLead.who !== me && (!prevLead.best || kg > prevLead.best.kg);
     if (lead) celebrate("LİDER SENSİN!");
     else if (pr) celebrate(prevBest ? "YENİ REKOR!" : "İLK KAYIT!");
-    else toast(`${form.ex} ${fmt(kg)} kg kaydedildi`);
+    else toast(`${form.ex}: ${detail.length} set kaydedildi`);
   } catch (e) {
     toast(e.status === 401 ? "Davet linki geçersiz." : e.status === 400 ? e.message : "Kaydedilemedi. İnternetini kontrol edip tekrar dene.");
   } finally {
@@ -621,7 +733,7 @@ function connect() {
 function renderKeepInputs() {
   // biri yazarken ekranı yeniden çizip girdiyi bozma
   const a = document.activeElement;
-  if (a && (a.id === "kg" || a.id === "newex")) return;
+  if (a && a.tagName === "INPUT" && $("#app").contains(a)) return;
   render();
 }
 
@@ -629,21 +741,38 @@ function renderKeepInputs() {
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button");
   if (!t) return;
-  if (t.dataset.login) { me = t.dataset.login; LS.set("me", me); view = "kaydet"; const last = bestOf(me, form.ex); if (last) form.kg = last.kg; render(); return; }
+  if (t.dataset.login) { me = t.dataset.login; LS.set("me", me); view = "kaydet"; loadRows(form.ex); LS.set("form", form); render(); return; }
   if (t.dataset.view) { view = t.dataset.view; LS.set("view", view); delAsk = ""; render(); window.scrollTo({ top: 0 }); return; }
   if (t.dataset.ex) {
     form.ex = t.dataset.ex;
-    const last = lifts.find((l) => l.who === me && l.ex === form.ex);
-    if (last) { form.kg = last.kg; form.reps = last.reps; form.sets = last.sets || form.sets; }
+    loadRows(form.ex); pyrOpen = false;
     LS.set("form", form); render(); return;
   }
-  if (t.dataset.kg) { form.kg = Math.max(0, Math.round((Number(form.kg) + Number(t.dataset.kg)) * 10) / 10); LS.set("form", form); $("#kg").value = form.kg; render(); return; }
-  if (t.dataset.reps) { form.reps = Math.max(1, Math.min(50, form.reps + Number(t.dataset.reps))); LS.set("form", form); render(); return; }
-  if (t.dataset.sets) { form.sets = Math.max(1, Math.min(20, form.sets + Number(t.dataset.sets))); LS.set("form", form); render(); return; }
+  if (t.dataset.rkg) { const r = form.rows[t.dataset.rkg]; r.kg = Math.max(0, Math.round((Number(r.kg) + Number(t.dataset.d)) * 100) / 100); LS.set("form", form); render(); return; }
+  if (t.dataset.rrep) { const r = form.rows[t.dataset.rrep]; r.reps = Math.max(1, Math.min(100, Number(r.reps) + Number(t.dataset.d))); LS.set("form", form); render(); return; }
+  if (t.dataset.rdel) { if (form.rows.length > 1) form.rows.splice(Number(t.dataset.rdel), 1); LS.set("form", form); render(); return; }
+  if (t.dataset.day) { calDay = t.dataset.day; delAsk = ""; render(); return; }
+  if (t.dataset.cal) { calOff = Math.min(0, calOff + Number(t.dataset.cal)); render(); return; }
+  if (t.dataset.goex) { form.ex = t.dataset.goex; loadRows(form.ex); pyrOpen = false; LS.set("form", form); view = "kaydet"; LS.set("view", view); render(); window.scrollTo({ top: 0 }); return; }
   if (t.dataset.mode) { rankMode = t.dataset.mode; LS.set("rankMode", rankMode); render(); return; }
   if (t.dataset.del) { if (delAsk === t.dataset.del) { delAsk = ""; deleteLift(t.dataset.del); } else { delAsk = t.dataset.del; render(); } return; }
   const act = t.dataset.act;
   if (act === "save") saveLift();
+  else if (act === "set-same" || act === "set-up") {
+    if (form.rows.length >= 20) return toast("En fazla 20 set.");
+    const l = form.rows[form.rows.length - 1];
+    form.rows.push({ kg: act === "set-up" ? Math.round((l.kg + 2.5) * 100) / 100 : l.kg, reps: l.reps });
+    LS.set("form", form); render();
+  }
+  else if (act === "pyr") { pyrOpen = !pyrOpen; render(); }
+  else if (act === "pyr-make") {
+    const num = (id) => parseFloat(String($(id).value).replace(",", "."));
+    const a = num("#pyr-a"), b = num("#pyr-b"), n = Math.round(num("#pyr-n")), reps = Math.round(num("#pyr-r"));
+    if (!(a > 0 && b > 0 && n >= 1 && n <= 20 && reps >= 1 && reps <= 100)) return toast("Başlangıç, bitiş, set (1–20) ve tekrarı gir.");
+    // ağırlıklar başlangıçtan bitişe eşit adımlarla, en yakın 0,5 kg'ye yuvarlanır
+    form.rows = Array.from({ length: n }, (_, i) => ({ kg: n === 1 ? b : Math.round((a + (b - a) * i / (n - 1)) * 2) / 2, reps }));
+    pyrOpen = false; LS.set("form", form); render();
+  }
   else if (act === "logout") { me = ""; LS.set("me", ""); render(); }
   else if (act === "invite") {
     const url = location.origin + "/?k=" + encodeURIComponent(GK);
@@ -654,10 +783,14 @@ document.addEventListener("click", (e) => {
   else if (act === "add-ex") { addingEx = !addingEx; render(); if (addingEx) setTimeout(() => $("#newex")?.focus(), 30); }
 });
 document.addEventListener("input", (e) => {
-  if (e.target.id === "kg") { const v = parseFloat(String(e.target.value).replace(",", ".")); if (Number.isFinite(v)) { form.kg = v; LS.set("form", form); } }
+  const f = e.target.dataset?.f;
+  if (f) {
+    const v = parseFloat(String(e.target.value).replace(",", "."));
+    const r = form.rows[Number(e.target.dataset.i)];
+    if (r && Number.isFinite(v) && v > 0) { r[f] = f === "kg" ? Math.round(v * 100) / 100 : Math.min(100, Math.round(v)); LS.set("form", form); $("#sum").innerHTML = sumHtml(); }
+  }
 });
 document.addEventListener("change", (e) => {
-  if (e.target.id === "kg") render();
   if (e.target.id === "rankEx") { rankEx = e.target.value; LS.set("rankEx", rankEx); render(); }
   if (e.target.id === "histEx") { histEx = e.target.value; LS.set("histEx", histEx); render(); }
 });

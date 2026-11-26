@@ -71,13 +71,27 @@ export class Gym extends DurableObject {
   }
 
   validate(players, b) {
-    const kg = Math.round(Number(b.kg) * 100) / 100, reps = Math.round(Number(b.reps)), sets = Math.round(Number(b.sets ?? 1));
+    let kg = Math.round(Number(b.kg) * 100) / 100, reps = Math.round(Number(b.reps)), sets = Math.round(Number(b.sets ?? 1));
+    let detail = null;
     if (!players.includes(b.who)) return "Bilinmeyen kişi.";
     if (!clip(b.ex, 40)) return "Hareket seç.";
+    if (Array.isArray(b.detail)) {
+      // Set set giriş (piramit vb.): her setin kendi kg'si ve tekrarı. kg/reps = en ağır set.
+      if (b.detail.length < 1 || b.detail.length > 20) return "1 ile 20 set arası girilebilir.";
+      detail = b.detail.map((s) => ({ kg: Math.round(Number(s?.kg) * 100) / 100, reps: Math.round(Number(s?.reps)) }));
+      for (const [i, s] of detail.entries()) {
+        if (!(s.kg > 0 && s.kg <= 1000)) return `${i + 1}. set: ağırlık 0 ile 1000 kg arasında olmalı.`;
+        if (!(s.reps >= 1 && s.reps <= 100)) return `${i + 1}. set: tekrar 1 ile 100 arasında olmalı.`;
+      }
+      const top = detail.reduce((a, s) => (s.kg > a.kg || (s.kg === a.kg && s.reps > a.reps) ? s : a));
+      kg = top.kg; reps = top.reps; sets = detail.length;
+    }
     if (!(kg > 0 && kg <= 1000)) return "Ağırlık 0 ile 1000 kg arasında olmalı.";
     if (!(reps >= 1 && reps <= 100)) return "Tekrar 1 ile 100 arasında olmalı.";
     if (!(sets >= 1 && sets <= 50)) return "Set 1 ile 50 arasında olmalı.";
-    return { who: b.who, ex: clip(b.ex, 40), kg, reps, sets };
+    const v = { who: b.who, ex: clip(b.ex, 40), kg, reps, sets };
+    if (detail) v.detail = detail;
+    return v;
   }
 
   async addLift(players, b) {
